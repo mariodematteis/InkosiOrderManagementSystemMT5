@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "project-name"
+description = "project-description"
+authors = [
+  { email = "email.address@provider.domain" },
+]
+maintainers = [
+  { email = "email.address@provider.domain" },
+]
+readme = "README.md"
+requires-python = ">=3.9,<3.10"
+dynamic = ["version"]
+keywords = [
+]
+classifiers = [
+]
+
+dependencies = [
+
+]
+
+[project.optional-dependencies]
+dev = [
+  "black",
+  "flake8",
+  "isort",
+  "pre-commit",
+  "pytest",
+  "pytest-asyncio",
+  "pytest-cov",
+]
+docs = [
+  "mkdocs",
+  "mkdocs-material",
+  "mkdocstrings[python]",
+  "pytkdocs[numpy-style]",
+]
+test = [
+  "pytest",
+  "pytest-asyncio",
+  "pytest-cov",
+]
+
+[project.urls]
+Repository = "https://github.com/BopaxDev/project-name"
+
+[tool.black]
+line-length = 88
+
+[tool.coverage.report]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]

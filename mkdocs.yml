@@ -1,0 +1,50 @@
+site_name: project-name
+repo_url: https://github.com/BopaxDev/project-name
+repo_name: BopaxDev/project-name
+theme:
+  favicon:
+  logo:
+  icon:
+    repo: fontawesome/brands/git-alt
+  name: material
+  features:
+    - header.autohide
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - toc.integrate
+
+extra:
+  # hide `Made with Material for MkDocs` footer
+  generator: false
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: numpy
+
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - toc:
+      permalink: true
+
+  # enable collapsible details blocks
+  - admonition
+  - pymdownx.details
+
+  # highlight code
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+
+  # embed code
+  - pymdownx.snippets

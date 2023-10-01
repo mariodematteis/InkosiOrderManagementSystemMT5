@@ -1,0 +1,10 @@
+name: project-name
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.9,<3.10
+  - pip
+  - ipython
+  - ipykernel
+  - pip:
+      - -e .[dev,docs]
