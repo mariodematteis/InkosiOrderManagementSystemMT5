@@ -3,16 +3,16 @@ requires = ["setuptools>=61.0.0", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "project-name"
-description = "project-description"
+name = "Inkosi"
+description = "Order Management System"
 authors = [
-  { email = "email.address@provider.domain" },
+  { email = "marionicdematteis@gmail.com" },
 ]
 maintainers = [
-  { email = "email.address@provider.domain" },
+  { email = "marionicdematteis@gmail.com" },
 ]
 readme = "README.md"
-requires-python = ">=3.9,<3.10"
+requires-python = ">=3.11,<3.12"
 dynamic = ["version"]
 keywords = [
 ]
@@ -20,7 +20,15 @@ classifiers = [
 ]
 
 dependencies = [
-
+  "beartype==0.16.2",
+  "fastapi[all]==0.103.2",
+  "omegaconf==2.3.0",
+  "psycopg2-binary==2.9.9",
+  "pydantic==2.4.2",
+  "pydantic-settings-yaml==0.2.0",
+  "pymongo==4.5.0",
+  "SQLAlchemy==2.0.21",
+  "sqlalchemy-utils==0.41.1",
 ]
 
 [project.optional-dependencies]
@@ -46,7 +54,7 @@ test = [
 ]
 
 [project.urls]
-Repository = "https://github.com/BopaxDev/project-name"
+Repository = "https://github.com/BopaxDev/Inkosi"
 
 [tool.black]
 line-length = 88
