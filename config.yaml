@@ -1,0 +1,27 @@
+PostgreSQL:
+  PROTOCOL: 'postgresql'
+  USERNAME: 'postgres'
+  PASSWORD: 'postgres'
+  HOSTNAME: 'localhost'
+  PORT: 5432
+  DATABASE: 'production'
+  PARAMETERS: ''  
+
+  COLLECTIONS:
+    Log: 'Logs'
+  
+MongoDB:
+  PROTOCOL: mongodb
+  USERNAME: test
+  PASSWORD: test
+  HOSTNAME: localhost
+  PORT: 27017
+  DATABASE: production
+  PARAMETERS: ''
+  TLS: false
+
+API:
+  AllowedIPAddresses: '*'
+  TokenAuthentication: false
+
+DockerInstance: false
