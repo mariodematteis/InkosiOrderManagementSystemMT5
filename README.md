@@ -30,7 +30,7 @@ As already mentioned, due to the MetaTrader5 API (which currently represents the
 MetaTrader5 is the most used trading platform on CFDs Broker.
 
 > [!NOTE]
-> __**CFD**__, __Credit For Difference, is a contract between a buyer and a seller that stipulates that the buyer must pay the seller the difference between the current value of an asset and its value at contract time.
+> __**CFD**__, __Credit For Difference__, is a contract between a buyer and a seller that stipulates that the buyer must pay the seller the difference between the current value of an asset and its value at contract time.
 
 ### Installation on Windows
 
