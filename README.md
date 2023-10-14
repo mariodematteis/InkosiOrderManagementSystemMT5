@@ -24,6 +24,8 @@
 It is a __OMS__ *(Order Management System)* written in Python which interacts, through the MetaTrader5 library, with the MetaTrader5 Client.
 The project aims to offers a solid and reliable infrastructure able to quickly open and close trading positions.
 
+![Alt text](docs/resources/Scenario.svg "Scenario")
+
 ## Installation
 
 As already mentioned, due to the MetaTrader5 API (which currently represents the only API Available for __*Trading Execution*__).
