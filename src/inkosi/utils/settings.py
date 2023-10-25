@@ -18,6 +18,7 @@ class PostgreSQL:
     HOSTNAME: str
     PORT: int
     DATABASE: str
+    SCHEMA: str
     PARAMETERS: str
 
 
@@ -70,8 +71,13 @@ def get_postgresql_settings() -> PostgreSQL:
 
 
 @lru_cache
+def get_postgresql_schema() -> str:
+    return get_postgresql_settings().SCHEMA
+
+
+@lru_cache
 def get_postgresql_url() -> str:
-    postgresql_settings = get_settings().PostgreSQL
+    postgresql_settings: PostgreSQL = get_settings().PostgreSQL
 
     return (
         f"{postgresql_settings.PROTOCOL}://"
