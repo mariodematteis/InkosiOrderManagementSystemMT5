@@ -1,4 +1,5 @@
 import logging
+from dataclasses import asdict
 
 from beartype import beartype
 
@@ -74,6 +75,9 @@ class Logger:
             "database",
             None,
         ):
+            if isinstance(kwargs.get("database"), bool) and not kwargs.get("database"):
+                return
+
             from inkosi.database.mongodb.database import MongoDBInstance
 
             self.mongo_manager = MongoDBInstance()
@@ -87,9 +91,8 @@ class Logger:
         )
 
         self.__register_to_log__(
-            self.name,
-            LogType.CRITICAL,
-            message,
+            log_type=LogType.CRITICAL,
+            message=message,
         )
 
     def debug(
@@ -101,9 +104,8 @@ class Logger:
         )
 
         self.__register_to_log__(
-            self.name,
-            LogType.DEBUG,
-            message,
+            log_type=LogType.DEBUG,
+            message=message,
         )
 
     def error(
@@ -115,9 +117,8 @@ class Logger:
         )
 
         self.__register_to_log__(
-            self.name,
-            LogType.ERROR,
-            message,
+            log_type=LogType.ERROR,
+            message=message,
         )
 
     def info(
@@ -129,9 +130,8 @@ class Logger:
         )
 
         self.__register_to_log__(
-            self.name,
-            LogType.INFO,
-            message,
+            log_type=LogType.INFO,
+            message=message,
         )
 
     def warn(
@@ -143,9 +143,8 @@ class Logger:
         )
 
         self.__register_to_log__(
-            self.name,
-            LogType.WARN,
-            message,
+            log_type=LogType.WARN,
+            message=message,
         )
 
     @beartype
@@ -158,10 +157,12 @@ class Logger:
             return
 
         self.mongo_manager.database[get_mongodb_settings().COLLECTIONS.Log].insert_one(
-            Log(
-                PackageName=self.package_name,
-                ModuleName=self.module_name,
-                Level=log_type,
-                Message=message,
-            ).model_dump()
+            asdict(
+                Log(
+                    PackageName=self.package_name,
+                    ModuleName=self.module_name,
+                    Level=log_type,
+                    Message=message,
+                )
+            )
         )
