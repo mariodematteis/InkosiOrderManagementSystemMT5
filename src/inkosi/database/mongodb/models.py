@@ -8,5 +8,4 @@ class Log:
     PackageName: str
     ModuleName: str
     Level: LogType
-    Service: str
     Message: str

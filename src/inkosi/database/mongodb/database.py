@@ -2,8 +2,11 @@ import certifi
 from pymongo import MongoClient
 from pymongo.database import Database
 
+from inkosi.log.log import Logger
 from inkosi.utils.exceptions import MongoConnectionError
 from inkosi.utils.settings import get_mongodb_settings, get_mongodb_url
+
+logger = Logger(module_name="MongoDBDatabase", package_name="mongodb", database=False)
 
 
 class DatabaseInstanceSingleton(
@@ -34,7 +37,7 @@ class MongoDBInstance(
     metaclass=DatabaseInstanceSingleton,
 ):
     client: MongoClient = None
-    db: Database = None
+    database: Database = None
 
     def __init__(
         self,
@@ -53,8 +56,9 @@ class MongoDBInstance(
             self.client.admin.command(
                 "ping",
             )
-            self.db = self.client[get_mongodb_settings().DATABASE]
+            self.database = self.client[get_mongodb_settings().DATABASE]
         except Exception:
+            logger.error("Unable to establish with the MongoDB Instance")
             raise MongoConnectionError
 
     def is_connected(
