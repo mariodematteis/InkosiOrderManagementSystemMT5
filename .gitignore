@@ -3,3 +3,4 @@ __pycache__
 *.bkp
 *.pages
 *.dtmp
+*.log
