@@ -4,11 +4,9 @@ PostgreSQL:
   PASSWORD: 'postgres'
   HOSTNAME: 'localhost'
   PORT: 5432
-  DATABASE: 'production'
-  PARAMETERS: ''  
-
-  COLLECTIONS:
-    Log: 'Logs'
+  DATABASE: 'Inkosi'
+  SCHEMA: 'development'
+  PARAMETERS: ''
   
 MongoDB:
   PROTOCOL: mongodb
@@ -19,6 +17,9 @@ MongoDB:
   DATABASE: production
   PARAMETERS: ''
   TLS: false
+
+  COLLECTIONS:
+    Log: 'Logs'
 
 API:
   AllowedIPAddresses: '*'
