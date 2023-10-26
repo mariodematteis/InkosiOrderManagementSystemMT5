@@ -25,4 +25,11 @@ API:
   AllowedIPAddresses: '*'
   TokenAuthentication: false
 
+Policies:
+  Administrator:
+    - portfolio_manager_full_access
+    - administrator_full_access
+  Investor:
+    - basic_investor_access
+
 DockerInstance: false
