@@ -54,7 +54,7 @@ app.include_router(
 async def startup_event() -> None:
     mongo_manager = MongoDBInstance()
     if not mongo_manager.is_connected():
-        logger.error("Unable to connect to the MongoDB Instance")
+        logger.error(message="Unable to connect to the MongoDB Instance")
 
     get_instance().connect()
 
