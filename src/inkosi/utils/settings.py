@@ -43,10 +43,17 @@ class API:
 
 
 @dataclass
+class Policies:
+    Administrator: list[str]
+    Investor: list[str]
+
+
+@dataclass
 class Settings:
     PostgreSQL: PostgreSQL
     MongoDB: MongoDB
     API: API
+    Policies: Policies
 
     DockerInstance: bool
 
@@ -115,3 +122,13 @@ def get_api_settings() -> API:
 @lru_cache
 def get_allowed_ip_addresses() -> list | str:
     return get_api_settings().AllowedIPAddresses
+
+
+@lru_cache
+def get_administrators_policies() -> list:
+    return get_settings().Policies.Administrator
+
+
+@lru_cache
+def get_investors_policies() -> list:
+    return get_settings().Policies.Investor
