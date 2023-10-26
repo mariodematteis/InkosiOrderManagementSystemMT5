@@ -58,7 +58,7 @@ class MongoDBInstance(
             )
             self.database = self.client[get_mongodb_settings().DATABASE]
         except Exception:
-            logger.error("Unable to establish with the MongoDB Instance")
+            logger.error(message="Unable to establish with the MongoDB Instance")
             raise MongoConnectionError
 
     def is_connected(
