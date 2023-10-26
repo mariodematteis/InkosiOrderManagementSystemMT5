@@ -1,7 +1,9 @@
 *.egg-info
-__pycache__
-*.bkp
 *.pages
 *.dtmp
+*.bkp
 *.log
+
 .DS_Store
+__pycache__
+
