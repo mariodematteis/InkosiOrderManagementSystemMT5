@@ -21,5 +21,6 @@ class v1:
 
     ADMIN: str = "/admin"
     INVESTOR: str = "/investor"
+    DATABASE: str = "/database"
 
     pass
