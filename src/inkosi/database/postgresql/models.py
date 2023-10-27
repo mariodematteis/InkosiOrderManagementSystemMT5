@@ -1,9 +1,8 @@
 import random
-import string
-from datetime import date
+from datetime import date, datetime
 from functools import lru_cache
 
-from sqlalchemy import ARRAY, Boolean, Column, Date, Float, Integer, String
+from sqlalchemy import ARRAY, Boolean, Column, Date, DateTime, Float, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
 
 from inkosi.database.postgresql.database import PostgreSQLInstance
@@ -72,23 +71,26 @@ class Funds(get_instance().base):
     commission_value: str = Column(Float, default=0.0)
 
 
-class Orders(get_instance().base):
-    __tablename__ = "orders"
+class Authentication(get_instance().base):
+    __tablename__ = "authentication"
 
     id: int = Column(
-        Integer,
+        String,
         primary_key=True,
         index=True,
-        default=lambda n: "".join(
-            [
-                random.choice(list(set(string.ascii_uppercase).union(string.digits)))
-                for i in range(n)
-            ]
-        ),
+        nullable=False,
     )
-    volume: float = Column(Float, nullable=False)
-    investors: dict = Column(JSONB, default={})
-    returns: float = Column(Float, default=0.0)
-    commission_broker: float = Column(Float, default=0.0)
-    commission_fund: float = Column(Float, default=0.0)
-    fund: str = Column(Float, nullable=False)
+
+    created_at: datetime = Column(
+        DateTime,
+        default=datetime.now(),
+        nullable=False,
+    )
+    validity: bool = Column(
+        Boolean,
+        default=True,
+        nullable=False,
+    )
+    user_type: str = Column(String, nullable=False)
+    user_id: int = Column(Integer, nullable=False)
+    ip_address: str = Column(String, nullable=True)
