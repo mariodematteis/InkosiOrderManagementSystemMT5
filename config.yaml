@@ -27,7 +27,7 @@ API:
   TokenAuthentication: true
   IPAddressCorrespondence: false
   TimeActivity: 
-    days: 2
+    days: 0
     hours: 6
     minutes: 30
     seconds: 30
