@@ -7,3 +7,7 @@ class MongoConnectionError(ConnectionFailure, Exception):
 
 class PostgreSQLConnectionError(Exception):
     "Unable to establish with the PostgreSQL Instance"
+
+
+class MT5AvailabilityError(Exception):
+    "Unable to find the MetaTrader5 Library"
