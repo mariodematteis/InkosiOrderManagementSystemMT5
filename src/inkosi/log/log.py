@@ -5,7 +5,7 @@ from beartype import beartype
 
 from inkosi.database.mongodb.models import Log
 from inkosi.models.log import LogType
-from inkosi.utils.settings import get_mongodb_settings
+from inkosi.utils.settings import get_mongodb_collection
 
 
 class Logger:
@@ -156,7 +156,7 @@ class Logger:
         if not self.mongo_manager:
             return
 
-        self.mongo_manager.database[get_mongodb_settings().COLLECTIONS.Log].insert_one(
+        self.mongo_manager.database[get_mongodb_collection().Log].insert_one(
             asdict(
                 Log(
                     PackageName=self.package_name,
