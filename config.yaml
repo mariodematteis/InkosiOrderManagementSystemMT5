@@ -20,10 +20,17 @@ MongoDB:
 
   COLLECTIONS:
     Log: 'Logs'
+    Trade: 'Trades'
 
 API:
   AllowedIPAddresses: '*'
-  TokenAuthentication: false
+  TokenAuthentication: true
+  IPAddressCorrespondence: false
+  TimeActivity: 
+    days: 2
+    hours: 6
+    minutes: 30
+    seconds: 30
 
 Policies:
   Administrator:
