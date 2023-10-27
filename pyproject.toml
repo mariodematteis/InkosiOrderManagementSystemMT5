@@ -22,11 +22,14 @@ classifiers = [
 dependencies = [
   "beartype==0.16.2",
   "fastapi[all]==0.103.2",
+  "numpy==1.26.0",
   "omegaconf==2.3.0",
+  "pandas==2.1.2",
   "psycopg2-binary==2.9.9",
   "pymongo==4.5.0",
   "SQLAlchemy==2.0.21",
   "sqlalchemy-utils==0.41.1",
+  "torch==2.1.0",
 ]
 
 [project.optional-dependencies]
