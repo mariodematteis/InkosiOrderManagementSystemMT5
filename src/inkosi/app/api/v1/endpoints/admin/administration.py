@@ -42,7 +42,7 @@ def create_administrator(administrator_request: AdministratorRequest):
     )
 
 
-@router.post(
+@router.get(
     path="/list_portfolio_managers",
     response_model=list[AdministratorProfile],
 )
@@ -68,7 +68,7 @@ def list_portfolio_managers(status: bool | None = None):
         return postgresql.get_portfolio_managers()
 
 
-@router.post(
+@router.get(
     path="/list_funds",
     response_model=list[Fund],
 )
@@ -98,7 +98,7 @@ def returns(return_request: ReturnRequest):
     ...
 
 
-@router.post(
+@router.put(
     path="/update_policies",
     response_class=Response,
 )
