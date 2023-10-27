@@ -4,8 +4,9 @@ from dataclasses import asdict
 from beartype import beartype
 
 from inkosi.database.mongodb.models import Log
-from inkosi.models.log import LogType
 from inkosi.utils.settings import get_mongodb_collection
+
+from .models import LogType
 
 
 class Logger:
