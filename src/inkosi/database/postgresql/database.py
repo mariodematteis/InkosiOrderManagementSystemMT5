@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from hashlib import sha256
 
 from beartype import beartype
@@ -13,11 +14,21 @@ from inkosi.utils.exceptions import PostgreSQLConnectionError
 from inkosi.utils.settings import (
     get_administrators_policies,
     get_investors_policies,
+    get_ip_address_correspondence,
     get_postgresql_schema,
     get_postgresql_url,
+    get_time_activity,
 )
 
-from .schemas import AdministratorProfile, Fund, PoliciesUpdate, User, UserRole
+from .schemas import (
+    AdministratorProfile,
+    AuthenticationOutput,
+    Fund,
+    PoliciesUpdate,
+    Tables,
+    User,
+    UserRole,
+)
 
 logger = Logger(
     module_name="PostgreSQLDatabase", package_name="postgresql", database=False
@@ -127,6 +138,47 @@ class PostgreSQLCrud:
     def __init__(self) -> None:
         self.postgresql_instance = PostgreSQLInstance()
 
+    def valid_authentication(
+        self,
+        token_id: str,
+        ip_address: str | None = None,
+    ) -> bool:
+        __query = (
+            f"SET search_path TO {get_postgresql_schema()}; SELECT id, created_at,"
+            " validity, user_id, ip_address FROM authentication WHERE id ="
+            f" '{token_id}'"
+        )
+
+        if get_ip_address_correspondence():
+            __query += (
+                " AND ip_address ="
+                f" '{ip_address if isinstance(ip_address, str) else ''}';"
+            )
+
+        result = [
+            AuthenticationOutput(**row._asdict())
+            for row in self.postgresql_instance.select(query=__query)
+        ]
+
+        match len(result):
+            case 1:
+                row = result[0]
+                created_at = row.created_at
+                if datetime.now() <= created_at + timedelta(**get_time_activity()):
+                    self.postgresql_instance.update(
+                        f"SET search_path TO {get_postgresql_schema()}; DELETE FROM"
+                        f" {Tables.AUTHENTICATION} WHERE id <> '{token_id}' AND user_id"
+                        f" = '{row.user_id}';"
+                    )
+                    return True
+                else:
+                    self.postgresql_instance.update(
+                        f"SET search_path TO {get_postgresql_schema()}; DELETE FROM"
+                        f" {Tables.AUTHENTICATION} WHERE id = '{token_id}';"
+                    )
+
+        return False
+
     def get_users(
         self,
         email_address: str,
@@ -169,10 +221,11 @@ class PostgreSQLCrud:
         self,
     ) -> list[AdministratorProfile]:
         __query = (
-            f"SET search_path TO {get_postgresql_schema()}; SELECT CONCAT(first_name, '"
-            " ', second_name) AS full_name, first_name, second_name, email_address,"
-            f" policies, '{UserRole.ADMINISTRATOR}' AS role FROM administrators WHERE"
-            " 'portfolio_manager_full_access' = ANY(policies);"
+            f"SET search_path TO {get_postgresql_schema()}; SELECT id,"
+            " CONCAT(first_name, ' ', second_name) AS full_name, first_name,"
+            f" second_name, email_address, policies, '{UserRole.ADMINISTRATOR}' AS role"
+            " FROM administrators WHERE 'portfolio_manager_full_access' ="
+            " ANY(policies);"
         )
 
         return [
