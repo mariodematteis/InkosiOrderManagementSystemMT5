@@ -1,15 +1,47 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from inkosi.app import _constants
+from inkosi.app.dependencies import authentication, network_policies_check
 
 from .endpoints.admin.administration import router as administration_router
 from .endpoints.admin.operations import router as operations_router
 from .endpoints.admin.scheduler import router as scheduler_router
-from .endpoints.admin.trades import router as trades_router
+from .endpoints.admin.trades.database import router as database_trading_router
+from .endpoints.admin.trades.trading import router as trading_router
 from .endpoints.profile import router as profile_router
 
 v1_router = APIRouter()
 
-v1_router.include_router(administration_router, tags=["Administrator"])
-v1_router.include_router(operations_router, tags=["Operations"])
-v1_router.include_router(scheduler_router, tags=["Scheduler"])
-v1_router.include_router(trades_router, tags=["Trades"])
-v1_router.include_router(profile_router, tags=["Profile"])
+v1_router.include_router(
+    router=administration_router,
+    tags=["Administrator"],
+    dependencies=[
+        Depends(authentication),
+        Depends(network_policies_check),
+    ],
+)
+v1_router.include_router(
+    router=operations_router,
+    tags=["Operations"],
+    dependencies=[
+        Depends(authentication),
+        Depends(network_policies_check),
+    ],
+)
+v1_router.include_router(
+    router=scheduler_router,
+    tags=["Scheduler"],
+)
+v1_router.include_router(
+    router=database_trading_router,
+    prefix=_constants.v1.DATABASE,
+    tags=["Database Trades Operations"],
+)
+v1_router.include_router(
+    router=trading_router,
+    tags=["Trading"],
+)
+v1_router.include_router(
+    router=profile_router,
+    tags=["Profile"],
+)
