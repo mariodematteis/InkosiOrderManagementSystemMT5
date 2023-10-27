@@ -1,6 +1,14 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 from inkosi.utils.utils import EnhancedStrEnum
+
+
+class Tables(EnhancedStrEnum):
+    ADMINISTRATOR: str = "administrator"
+    INVESTOR: str = "investor"
+    FUNDS: str = "funds"
+    AUTHENTICATION: str = "authentication"
 
 
 class UserRole(EnhancedStrEnum):
@@ -42,6 +50,15 @@ class Fund:
     fund_name: str
     portfolio_managers: list[str]
     investors: list[str]
+
+
+@dataclass
+class AuthenticationOutput:
+    id: str
+    created_at: datetime
+    validity: bool
+    user_id: str
+    ip_address: str
 
 
 @dataclass
