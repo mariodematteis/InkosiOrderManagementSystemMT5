@@ -6,8 +6,17 @@ from omegaconf import OmegaConf
 
 
 @dataclass
+class TimeActivity:
+    days: int
+    hours: int
+    minutes: int
+    seconds: int
+
+
+@dataclass
 class MongoDBCollections:
     Log: str
+    Trade: str
 
 
 @dataclass
@@ -40,6 +49,8 @@ class MongoDB:
 class API:
     AllowedIPAddresses: str | list
     TokenAuthentication: bool
+    IPAddressCorrespondence: bool
+    TimeActivity: TimeActivity
 
 
 @dataclass
@@ -101,6 +112,11 @@ def get_mongodb_settings() -> MongoDB:
 
 
 @lru_cache
+def get_mongodb_collection() -> MongoDBCollections:
+    return get_mongodb_settings().COLLECTIONS
+
+
+@lru_cache
 def get_mongodb_url() -> str:
     mongodb_settings = get_settings().MongoDB
 
@@ -122,6 +138,16 @@ def get_api_settings() -> API:
 @lru_cache
 def get_allowed_ip_addresses() -> list | str:
     return get_api_settings().AllowedIPAddresses
+
+
+@lru_cache
+def get_ip_address_correspondence() -> bool:
+    return get_api_settings().IPAddressCorrespondence
+
+
+@lru_cache
+def get_time_activity() -> dict:
+    return get_api_settings().TimeActivity
 
 
 @lru_cache
