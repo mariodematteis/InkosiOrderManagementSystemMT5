@@ -1,7 +1,12 @@
-from fastapi import APIRouter, Response, status
+import random
+import string
+from hashlib import sha256
+
+from fastapi import APIRouter, Request, Response, status
 from fastapi.responses import JSONResponse
 
 from inkosi.database.postgresql.database import PostgreSQLCrud
+from inkosi.database.postgresql.models import Authentication
 from inkosi.database.postgresql.schemas import LoginCredentials, UserRole
 from inkosi.log.log import Logger
 
@@ -11,7 +16,10 @@ logger = Logger(module_name="Profile", package_name="api")
 
 
 @router.get(path="/login")
-async def login(credentials: LoginCredentials) -> Response:
+async def login(
+    credentials: LoginCredentials,
+    request: Request,
+) -> Response:
     postgresql = PostgreSQLCrud()
     records = postgresql.get_users(
         email_address=credentials.email_address,
@@ -51,10 +59,31 @@ async def login(credentials: LoginCredentials) -> Response:
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
 
+            token_id: str = sha256(
+                "".join(
+                    [
+                        random.choice(
+                            list(set(string.ascii_uppercase).union(string.digits))
+                        )
+                        for _ in range(16)
+                    ]
+                ).encode()
+            ).hexdigest()
+
+            authentication = Authentication(
+                id=token_id,
+                user_type=records[0].role,
+                user_id=records[0].id,
+                ip_address=request.client.host,
+            )
+
+            postgresql.postgresql_instance.add(model=[authentication])
+
             return JSONResponse(
                 content={
                     "detail": "Successfully logged in",
                     "role": records[0].role,
+                    "token": token_id,
                 },
                 status_code=status.HTTP_200_OK,
             )
@@ -80,7 +109,7 @@ async def login(credentials: LoginCredentials) -> Response:
             return JSONResponse(
                 content={
                     "detail": (
-                        "The user have been identifie with two different type of roles"
+                        "The user have been identified with two different type of roles"
                     )
                 },
                 status_code=status.HTTP_200_OK,
