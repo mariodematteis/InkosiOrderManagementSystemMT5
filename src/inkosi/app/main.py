@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, Request, status
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -7,7 +7,6 @@ from fastapi.templating import Jinja2Templates
 from inkosi import __project_name__, __version__
 from inkosi.app import _constants
 from inkosi.app.api.v1._routes import v1_router
-from inkosi.app.dependencies import authentication, network_policies_check
 from inkosi.database.mongodb.database import MongoDBInstance
 from inkosi.database.postgresql.models import get_instance
 from inkosi.log.log import Logger
@@ -46,7 +45,6 @@ app.mount(
 app.include_router(
     v1_router,
     prefix=_constants.API + _constants.V1,
-    dependencies=[Depends(authentication), Depends(network_policies_check)],
 )
 
 
