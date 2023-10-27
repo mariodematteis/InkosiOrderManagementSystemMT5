@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from bson import ObjectId
 
-from inkosi.models.log import LogType
+from inkosi.log.models import LogType
 
 
 @dataclass
