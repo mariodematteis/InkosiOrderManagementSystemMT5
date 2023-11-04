@@ -1,6 +1,13 @@
 from dataclasses import dataclass
 from datetime import date
 
+from inkosi.utils.utils import EnhancedStrEnum
+
+
+class Mode(EnhancedStrEnum):
+    BACKTEST: str = "backtesting"
+    WEBAPP: str = "webapp"
+
 
 @dataclass
 class AdministratorRequest:
