@@ -22,6 +22,7 @@ classifiers = [
 dependencies = [
   "beartype==0.16.2",
   "fastapi[all]==0.103.2",
+  "matplotlib==3.8.1",
   "numpy==1.26.0",
   "omegaconf==2.3.0",
   "pandas==2.1.2",
@@ -29,6 +30,9 @@ dependencies = [
   "pymongo==4.5.0",
   "SQLAlchemy==2.0.21",
   "sqlalchemy-utils==0.41.1",
+  "streamlit==1.28.0",
+  "streamlit-modal==0.1.0",
+  "ta==0.10.3",
   "torch==2.1.0",
 ]
 
