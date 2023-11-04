@@ -76,7 +76,7 @@ class Logger:
             "database",
             None,
         ):
-            if isinstance(kwargs.get("database"), bool) and not kwargs.get("database"):
+            if isinstance(kwargs.get("database"), bool):
                 return
 
             from inkosi.database.mongodb.database import MongoDBInstance
