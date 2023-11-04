@@ -10,6 +10,7 @@ from inkosi.app.api.v1._routes import v1_router
 from inkosi.database.mongodb.database import MongoDBInstance
 from inkosi.database.postgresql.models import get_instance
 from inkosi.log.log import Logger
+from inkosi.portfolio.risk_management import RiskManagement
 
 _API_HEALTHCHECK = "OK"
 _API_DESCRIPTION = "Inkosi API"
@@ -55,6 +56,8 @@ async def startup_event() -> None:
         logger.error(message="Unable to connect to the MongoDB Instance")
 
     get_instance().connect()
+
+    RiskManagement()
 
 
 @app.on_event(event_type="shutdown")
