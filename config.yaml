@@ -31,6 +31,8 @@ API:
     hours: 6
     minutes: 30
     seconds: 30
+  APIs:
+    - MetaTrader5
 
 Policies:
   Administrator:
@@ -38,5 +40,8 @@ Policies:
     - administrator_full_access
   Investor:
     - basic_investor_access
+
+RiskManagement:
+  Models:
 
 DockerInstance: false
