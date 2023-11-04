@@ -107,7 +107,11 @@ class MongoDBCrud:
             get_mongodb_collection().Trade
         ]
 
-        result = trades_collection.insert_one(asdict(trade_request))
+        result = trades_collection.insert_one(
+            asdict(
+                trade_request,
+            ),
+        )
         return result.inserted_id
 
     def update_trade(

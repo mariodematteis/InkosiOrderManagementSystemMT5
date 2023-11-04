@@ -14,7 +14,7 @@ class Position(EnhancedStrEnum):
 
 
 @dataclass
-class TradeRequest:
+class OpenTradeRequest:
     fund: int | None = None
     portfolio_manager: int | None = None
     ats: str | None = None
