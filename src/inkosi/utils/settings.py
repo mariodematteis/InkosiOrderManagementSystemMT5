@@ -51,6 +51,7 @@ class API:
     TokenAuthentication: bool
     IPAddressCorrespondence: bool
     TimeActivity: TimeActivity
+    APIs: list
 
 
 @dataclass
@@ -60,11 +61,17 @@ class Policies:
 
 
 @dataclass
+class RiskManagement:
+    Models: list | None
+
+
+@dataclass
 class Settings:
     PostgreSQL: PostgreSQL
     MongoDB: MongoDB
     API: API
     Policies: Policies
+    RiskManagement: RiskManagement
 
     DockerInstance: bool
 
@@ -158,3 +165,13 @@ def get_administrators_policies() -> list:
 @lru_cache
 def get_investors_policies() -> list:
     return get_settings().Policies.Investor
+
+
+@lru_cache
+def get_risk_management() -> RiskManagement:
+    return get_settings().RiskManagement
+
+
+@lru_cache
+def get_risk_management_models() -> list | None:
+    return get_risk_management().Models
