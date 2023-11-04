@@ -1,14 +1,22 @@
 import random
 import string
+from dataclasses import asdict
 from hashlib import sha256
 
 from fastapi import APIRouter, Request, Response, status
 from fastapi.responses import JSONResponse
 
 from inkosi.database.postgresql.database import PostgreSQLCrud
-from inkosi.database.postgresql.models import Authentication
-from inkosi.database.postgresql.schemas import LoginCredentials, UserRole
+from inkosi.database.postgresql.models import Authentication, Funds
+from inkosi.database.postgresql.schemas import (
+    FundInformation,
+    LoginCredentials,
+    RaiseNewFund,
+    UserRole,
+)
 from inkosi.log.log import Logger
+from inkosi.mailing.mailer import Mailer
+from inkosi.mailing.schemas import EmailReceivedAdministratorFundRaising
 
 router = APIRouter()
 
@@ -75,6 +83,7 @@ async def login(
                 user_type=records[0].role,
                 user_id=records[0].id,
                 ip_address=request.client.host,
+                mode="webapp",
             )
 
             postgresql.postgresql_instance.add(model=[authentication])
@@ -127,6 +136,73 @@ async def login(
                         "More than two users have been found with the E-mail Address"
                         " given"
                     )
+                },
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+@router.post(path="/fund")
+async def raise_fund(raise_new_fund: RaiseNewFund) -> Response:
+    postgresql = PostgreSQLCrud()
+
+    fund = Funds(**asdict(raise_new_fund))
+    result = postgresql.postgresql_instance.add(model=[fund])
+    if result:
+        mailer = Mailer()
+        result: EmailReceivedAdministratorFundRaising = (
+            mailer.send_email_to_administrator_for_fund_raising(
+                raise_new_fund,
+            )
+        )
+        return JSONResponse(
+            content={
+                "detail": (
+                    "New Fund correctly raised. Corresponding record added to the"
+                    " database."
+                ),
+                "administrator_email_received": result.administrator_received,
+                "administrator_email_not_received": result.administrator_not_received,
+            }
+        )
+    else:
+        return JSONResponse(
+            content=f"Uanble to create the new fund: {raise_new_fund.fund_name}",
+            status_code=status.HTTP_200_OK,
+        )
+
+
+@router.get(path="/fund")
+async def fund_information(
+    fund_name: str,
+    request: Request,
+) -> Response:
+    # Check for policies through the Token given
+
+    postgresql = PostgreSQLCrud()
+    records: list[FundInformation] = postgresql.get_fund_information(
+        fund_name=fund_name,
+    )
+
+    match len(records):
+        case 0:
+            return JSONResponse(
+                content={
+                    "detail": "Unable to fetch information regarding the specified fund"
+                },
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+        case 1:
+            return JSONResponse(
+                content={"detail": "Fund information correctly fetched"},
+                status_code=status.HTTP_200_OK,
+            )
+        case _:
+            return JSONResponse(
+                content={
+                    "detail": (
+                        "Unable to correctly fetch the information two or more records"
+                        " have been found."
+                    ),
                 },
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
