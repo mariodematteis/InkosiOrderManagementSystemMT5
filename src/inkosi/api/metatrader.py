@@ -1,5 +1,7 @@
 from inkosi.utils.exceptions import MT5AvailabilityError
 
+from .schemas import OpenRequestTradeResult
+
 try:
     import MetaTrader5 as mt5
 
@@ -21,3 +23,7 @@ def initialize() -> bool:
 def shutdown() -> None:
     check_mt5_available()
     mt5.shutdown()
+
+
+def open_position() -> OpenRequestTradeResult:
+    ...
