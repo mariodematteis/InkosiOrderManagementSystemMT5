@@ -23,7 +23,9 @@ from inkosi.utils.settings import (
 from .schemas import (
     AdministratorProfile,
     AuthenticationOutput,
+    Commission,
     Fund,
+    FundInformation,
     PoliciesUpdate,
     Tables,
     User,
@@ -97,16 +99,25 @@ class PostgreSQLInstance(metaclass=DatabaseInstanceSingleton):
     def add(
         self,
         model: Iterable[declarative_base()] | declarative_base(),
-    ) -> None:
+    ) -> bool:
         __session = sessionmaker(bind=self.engine)
         with __session() as session:
-            if isinstance(model, Iterable):
-                session.add_all(model)
-            else:
-                session.add(model)
+            try:
+                if isinstance(model, Iterable):
+                    session.add_all(model)
+                else:
+                    session.add(model)
 
-            session.commit()
-            session.close()
+                session.commit()
+                session.close()
+            except Exception as error:
+                logger.error(
+                    "Unable to add the specified records to the database. Error"
+                    f" occurred: {error}"
+                )
+                return False
+            else:
+                return True
 
     @beartype
     def select(
@@ -126,12 +137,20 @@ class PostgreSQLInstance(metaclass=DatabaseInstanceSingleton):
     def update(
         self,
         query: TextClause | str,
-    ) -> None:
+    ) -> bool:
         __session = sessionmaker(bind=self.engine)
         with __session() as session:
-            session.execute(query if isinstance(query, TextClause) else text(query))
-            session.commit()
-            session.close()
+            try:
+                session.execute(query if isinstance(query, TextClause) else text(query))
+                session.commit()
+                session.close()
+            except Exception as error:
+                logger.error(
+                    f"Unable to update records on the database. Error occurred: {error}"
+                )
+                return False
+            else:
+                return True
 
 
 class PostgreSQLCrud:
@@ -146,7 +165,48 @@ class PostgreSQLCrud:
         __query = (
             f"SET search_path TO {get_postgresql_schema()}; SELECT id, created_at,"
             " validity, user_id, ip_address FROM authentication WHERE id ="
-            f" '{token_id}'"
+            f" '{token_id}' AND mode = 'webapp';"
+        )
+
+        if get_ip_address_correspondence():
+            __query += (
+                " AND ip_address ="
+                f" '{ip_address if isinstance(ip_address, str) else ''}';"
+            )
+
+        result = [
+            AuthenticationOutput(**row._asdict())
+            for row in self.postgresql_instance.select(query=__query)
+        ]
+
+        match len(result):
+            case 1:
+                row = result[0]
+                created_at = row.created_at
+                if datetime.now() <= created_at + timedelta(**get_time_activity()):
+                    self.postgresql_instance.update(
+                        f"SET search_path TO {get_postgresql_schema()}; DELETE FROM"
+                        f" {Tables.AUTHENTICATION} WHERE id <> '{token_id}' AND user_id"
+                        f" = '{row.user_id}';"
+                    )
+                    return True
+                else:
+                    self.postgresql_instance.update(
+                        f"SET search_path TO {get_postgresql_schema()}; DELETE FROM"
+                        f" {Tables.AUTHENTICATION} WHERE id = '{token_id}';"
+                    )
+
+        return False
+
+    def valid_backtesting_token(
+        self,
+        token_id: str,
+        ip_address: str | None = None,
+    ) -> bool:
+        __query = (
+            f"SET search_path TO {get_postgresql_schema()}; SELECT id, created_at,"
+            " validity, user_id, ip_address FROM authentication WHERE id ="
+            f" '{token_id}' AND mode = 'backtest';"
         )
 
         if get_ip_address_correspondence():
@@ -188,11 +248,11 @@ class PostgreSQLCrud:
             f"SET search_path TO {get_postgresql_schema()}; SELECT id,"
             " CONCAT(first_name, ' ', second_name) AS full_name, first_name,"
             f" second_name, email_address, '{UserRole.ADMINISTRATOR}' AS role FROM"
-            f" administrators WHERE email_address = '{email_address}' AND password ="
-            f" '{sha256(password.encode()).hexdigest()}' UNION ALL SELECT id,"
-            " CONCAT(first_name, ' ', second_name) AS full_name, first_name,"
-            f" second_name, email_address, '{UserRole.INVESTOR}' AS role FROM investors"
-            f" WHERE email_address = '{email_address}' AND password ="
+            f" administrators WHERE CAST(id AS TEXT) = '{email_address}' AND"
+            f" password = '{sha256(password.encode()).hexdigest()}' UNION ALL SELECT"
+            " id, CONCAT(first_name, ' ', second_name) AS full_name, first_name,"
+            f" second_name, email_address, '{UserRole.INVESTOR}' AS role"
+            f" FROM investors WHERE email_address = '{email_address}' AND password ="
             f" '{sha256(password.encode()).hexdigest()}';"
         )
 
@@ -288,3 +348,109 @@ class PostgreSQLCrud:
 
         self.postgresql_instance.update(query=__query)
         return True
+
+    def get_fund_information(self, fund_name: str) -> FundInformation:
+        __query = (
+            f"SET search_path TO {get_postgresql_schema()}; SELECT investment_firm,"
+            " fund_name, administrators, investors, capital_distribution,"
+            " commission_type, commission_value, array['Sample1', 'Sample2']::text"
+            f" FROM funds WHERE fund_name = '{fund_name}';"
+        )
+
+        return [
+            FundInformation(**row._asdict())
+            for row in self.postgresql_instance.select(query=__query)
+        ]
+
+    def check_for_investor_existence(
+        self,
+        investor_id: int,
+    ) -> bool:
+        __query = (
+            f"SET search_path TO {get_postgresql_schema()}; SELECT id FROM"
+            f" investors WHERE id = '{str(investor_id)}';"
+        )
+
+        result = self.postgresql_instance.select(query=__query)
+        match len(result):
+            case 0:
+                return False
+            case 1:
+                return True
+            case _:
+                logger.critical(
+                    "Two or more investors have been found with the same id."
+                )
+                return False
+
+    def check_for_administrator_existence(
+        self,
+        administrator_id: int,
+    ) -> bool:
+        __query = (
+            f"SET search_path TO {get_postgresql_schema()}; SELECT id FROM"
+            f" administrators WHERE id = '{str(administrator_id)}';"
+        )
+
+        result = self.postgresql_instance.select(query=__query)
+        match len(result):
+            case 0:
+                return False
+            case 1:
+                return True
+            case _:
+                logger.critical(
+                    "Two or more administrators have been found with the same id."
+                )
+                return False
+
+    def add_investor_to_fund(
+        self,
+        investor_id: int,
+        fund: str | int,
+    ) -> bool:
+        if self.check_for_investor_existence(investor_id=investor_id):
+            __query = (
+                f"SET search_path TO {get_postgresql_schema()}; UPDATE funds SET"
+                " investors = (SELECT array_agg(distinct e) FROM"
+                f" unnest(investors) || array['{str(investor_id)}']::text[]"
+                f" e) WHERE fund_name = '{fund}' OR id = {fund};"
+            )
+
+            # TODO: Update capital_distribution JSONB
+
+            self.postgresql_instance.update(query=__query)
+            return True
+        else:
+            return False
+
+    def add_administrator_to_fund(
+        self,
+        administrator_id: int,
+        fund: str | int,
+    ) -> bool:
+        if self.check_for_administrator_existence(administrator_id=administrator_id):
+            __query = (
+                f"SET search_path TO {get_postgresql_schema()}; UPDATE funds SET"
+                " administrators = (SELECT array_agg(distinct e) FROM"
+                f" unnest(administrators) || array['{str(administrator_id)}']::text[]"
+                f" e) WHERE fund_name = '{fund}' OR id = {fund};"
+            )
+
+            self.postgresql_instance.update(query=__query)
+            return True
+        else:
+            return False
+
+    def update_commission(
+        self,
+        commission: Commission,
+    ) -> bool:
+        __query = (
+            f"SET search_path TO {get_postgresql_schema()}; UPDATE funds SET"
+            f" commission_type = '{commission.commission_type}', commission_value ="
+            f" {commission.commission_value} WHERE fund_name = '{commission.fund}'"
+            f" OR id = {commission.fund};"
+        )
+
+        return self.postgresql_instance.update(query=__query)

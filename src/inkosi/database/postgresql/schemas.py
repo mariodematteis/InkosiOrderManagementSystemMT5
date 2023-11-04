@@ -70,3 +70,45 @@ class ReturnRequest:
 class LoginCredentials:
     email_address: str
     password: str
+
+
+@dataclass
+class FundInformation:
+    investment_firm: str
+    fund_name: str
+    administrators: list[str]
+    investors: list[str]
+    strategies: list[str]
+    capital_distribution: dict
+    commission_type: str
+    commission_value: str
+
+
+@dataclass
+class RaiseNewFund:
+    fund_name: str
+    investment_firm: str | None
+    commission_type: str
+    commission_value: str
+    administrators: list[int]
+    investors: list[str] = []
+    capital_distribution: dict = {}
+
+
+@dataclass
+class AddInvestorToFund:
+    investor_id: int
+    fund: str | int
+
+
+@dataclass
+class AddAdministratorToFund:
+    administrator_id: int
+    fund: str | int
+
+
+@dataclass
+class Commission:
+    commission_type: str
+    commission_value: float | int
+    fund: str | int

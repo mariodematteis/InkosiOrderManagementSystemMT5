@@ -48,7 +48,6 @@ class Investor(get_instance().base):
     birthday: date = Column(Date, nullable=False)
     fiscal_code: str = Column(String, nullable=True)
     password: str = Column(String, nullable=False)
-    fund_deposit: float = Column(Float, default=0.0)
     policies: list = Column(ARRAY(String), default=[])
     active: bool = Column(Boolean, default=True)
 
@@ -63,8 +62,8 @@ class Funds(get_instance().base):
         default=random.randint(10000000, 99999999),
     )
     fund_name: str = Column(String, nullable=False, unique=True)
-    investment_firm: list[int] = Column(ARRAY(String), default=[])
-    administrator: list[int] = Column(ARRAY(Integer), default=[])
+    investment_firm: str = Column(String, nullable=True)
+    administrators: list[int] = Column(ARRAY(Integer), default=[])
     investors: list[int] = Column(ARRAY(Integer), default=[])
     capital_distribution: dict = Column(JSONB, default={})
     commission_type: str = Column(String, default="percentual")
@@ -93,4 +92,5 @@ class Authentication(get_instance().base):
     )
     user_type: str = Column(String, nullable=False)
     user_id: int = Column(Integer, nullable=False)
+    mode: str = Column(String, nullable=False)
     ip_address: str = Column(String, nullable=True)
