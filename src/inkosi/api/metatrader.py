@@ -21,7 +21,7 @@ logger = Logger(module_name="metatrader5", package_name="api")
 
 def check_mt5_available() -> bool:
     if not MT5_AVAILABLE:
-        raise False
+        return False
 
     if not mt5.initialize(
         server=get_environmental_settings().SERVER,

@@ -15,8 +15,8 @@ class StatusTradeResult(IntEnum):
 
 @dataclass
 class OpenRequestTradeResult:
-    trade_id: int
     detail: str
     status: StatusTradeResult
+    trade_id: int | None = None
     error: str | None = None
     error_code: int | None = None
