@@ -68,6 +68,7 @@ class Funds(get_instance().base):
     capital_distribution: dict = Column(JSONB, default={})
     commission_type: str = Column(String, default="percentual")
     commission_value: str = Column(Float, default=0.0)
+    risk_limits: bool = Column(Boolean, default=False)
 
 
 class Authentication(get_instance().base):
