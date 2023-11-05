@@ -14,7 +14,7 @@ class Position(EnhancedStrEnum):
 
 
 @dataclass
-class OpenTradeRequest:
+class TradeRequest:
     fund: int | None = None
     portfolio_manager: int | None = None
     ats: str | None = None
@@ -22,8 +22,8 @@ class OpenTradeRequest:
     order_type: OrderType | None = None
     operation: Position | None = None
     ticker: str | None = None
-    take_profit: str | None = None
-    stop_loss: str | None = None
+    take_profit: float | None = None
+    stop_loss: float | None = None
     entry_point: float | None = None
     close_price: float | None = None
     volume: float | None = None
