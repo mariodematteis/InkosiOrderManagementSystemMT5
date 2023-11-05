@@ -3,6 +3,18 @@ from functools import lru_cache
 from pathlib import Path
 
 from omegaconf import OmegaConf
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class EnvSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_prefix="INKOSI_",
+        case_sensitive=False,
+    )
+
+    ACCOUNT: str
+    PASSWORD: str
+    SERVER: str
 
 
 @dataclass
@@ -74,6 +86,11 @@ class Settings:
     RiskManagement: RiskManagement
 
     DockerInstance: bool
+
+
+@lru_cache
+def get_environmental_settings() -> EnvSettings:
+    return EnvSettings()
 
 
 @lru_cache
