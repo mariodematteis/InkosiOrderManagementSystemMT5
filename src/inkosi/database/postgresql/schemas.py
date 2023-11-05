@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 from inkosi.utils.utils import EnhancedStrEnum
@@ -91,8 +91,8 @@ class RaiseNewFund:
     commission_type: str
     commission_value: str
     administrators: list[int]
-    investors: list[str] = []
-    capital_distribution: dict = {}
+    investors: list[str] = field(default_factory=[])
+    capital_distribution: dict = field(default_factory={})
 
 
 @dataclass

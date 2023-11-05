@@ -17,11 +17,11 @@ class RiskManagementMetaclass(type):
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         if get_risk_management_models() is None:
             logger.warn("No Risk Management models have been implemented")
-
-        for model in get_risk_management_models():
-            model_initialisation = self.models_initialised.get(model, 0)
-            if model_initialisation == 0:
-                self.initialise_model(model_path=model)
+        else:
+            for model in get_risk_management_models():
+                model_initialisation = self.models_initialised.get(model, 0)
+                if model_initialisation == 0:
+                    self.initialise_model(model_path=model)
 
         return super().__call__(*args, **kwds)
 

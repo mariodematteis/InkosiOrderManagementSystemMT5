@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from inkosi.utils.utils import EnhancedStrEnum
 
@@ -16,4 +16,4 @@ class NewFund:
 @dataclass
 class EmailReceivedAdministratorFundRaising:
     administrator_received: list[str]
-    administrator_not_received: dict[str, str] = {}
+    administrator_not_received: dict[str, str] = field(default_factory={})
