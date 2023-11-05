@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from inkosi import __project_name__, __version__
@@ -27,21 +26,6 @@ app.add_middleware(
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
-)
-app.mount(
-    path="/templates/stylesheets",
-    app=StaticFiles(directory="templates/stylesheets"),
-    name="stylesheets",
-)
-app.mount(
-    path="/templates/contents",
-    app=StaticFiles(directory="templates/contents"),
-    name="contents",
-)
-app.mount(
-    path="/templates/scripts",
-    app=StaticFiles(directory="templates/scripts"),
-    name="scripts",
 )
 app.include_router(
     v1_router,

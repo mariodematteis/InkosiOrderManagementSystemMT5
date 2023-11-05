@@ -7,14 +7,14 @@ from inkosi.api.schemas import OpenRequestTradeResult, StatusTradeResult
 from inkosi.database.mongodb.database import MongoDBCrud
 from inkosi.database.mongodb.schemas import TradeRequest
 
-router = APIRouter()
+router = APIRouter(prefix="/trading")
 
 
 @router.post(path="/position")
 async def position(order: TradeRequest) -> Response:
     mongodb = MongoDBCrud()
 
-    result: OpenRequestTradeResult = open_position(order)
+    result: OpenRequestTradeResult = open_position(order, False)
     match result.status:
         case StatusTradeResult.ORDER_FILLED:
             record_id: ObjectId | None = mongodb.add_trade(order)
@@ -30,6 +30,7 @@ async def position(order: TradeRequest) -> Response:
             return JSONResponse(
                 content={
                     "detail": "Unable to open the position",
+                    "message": result.detail,
                 },
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
