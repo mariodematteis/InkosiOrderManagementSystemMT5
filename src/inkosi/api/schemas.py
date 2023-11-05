@@ -11,6 +11,8 @@ class StatusTradeResult(IntEnum):
     NO_TAKE_PROFIT_SPECIFIED: int = -5
     NO_STOP_LOSS_SPECIFIED: int = -6
     NO_ORDER_FILLING: int = -7
+    NO_FILLING_TYPE_FOUND: int = -8
+    MARKET_CLOSED: int = -9
 
 
 @dataclass

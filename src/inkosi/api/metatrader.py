@@ -1,4 +1,5 @@
 import random
+import time
 from functools import lru_cache
 
 from inkosi.database.mongodb.schemas import Position, TradeRequest
@@ -29,9 +30,12 @@ def check_mt5_available() -> bool:
         password=get_environmental_settings().PASSWORD,
     ):
         logger.error(
-            "Unable to establish a connection the Broker through the given credentials"
+            "Unable to establish a connection to the Broker through the given"
+            " credentials"
         )
         return False
+
+    return True
 
 
 def initialize() -> bool:
@@ -46,7 +50,7 @@ def shutdown() -> None:
 @lru_cache
 def get_all_symbols_available() -> list[str] | None:
     if initialize():
-        return [symbol._asdict().get("name", "") for symbol in list(mt5.symols_get())]
+        return [symbol._asdict().get("name", "") for symbol in list(mt5.symbols_get())]
 
     logger.critical("No symbols have been found")
 
@@ -67,13 +71,13 @@ def check_for_positions_opened_on_symbol(symbol: str) -> int | None:
 
 # TODO: Add hinting
 def get_symbol_filling(symbol: str) -> int | None:
-    if not initialize() or check_for_financial_product_existence(symbol):
+    if not initialize() or not check_for_financial_product_existence(symbol):
         return
 
     match mt5.symbol_info(symbol)._asdict().get("filling_mode", None):
         case None:
             logger.error(
-                f"Unable to fetch informatin regarding the symbol specified: {symbol}"
+                f"Unable to fetch information regarding the symbol specified: {symbol}"
             )
             return
         case 1:
@@ -85,7 +89,7 @@ def get_symbol_filling(symbol: str) -> int | None:
 
 
 # TODO: Check if returns less or equal to 0 when the market is closed on that product
-def get_ask_of_symbol(symbol):
+def get_ask_of_symbol(symbol: str) -> float:
     ask = mt5.symbol_info_tick(symbol).ask
     if ask > 0:
         return ask
@@ -93,12 +97,26 @@ def get_ask_of_symbol(symbol):
         get_ask_of_symbol(symbol)
 
 
-def get_bid_of_symbol(symbol):
+def get_bid_of_symbol(symbol: str) -> float:
     bid = mt5.symbol_info_tick(symbol).bid
     if bid > 0:
         return bid
     else:
         get_bid_of_symbol(symbol)
+
+
+def check_symbol_market_opened(symbol: str) -> bool:
+    symbol_information = mt5.symbol_info(symbol)
+    if not symbol_information:
+        logger.error(
+            f"Unable to fetch information regarding the symbol specified: {symbol}"
+        )
+        return False
+
+    if symbol_information._asdict().get("time", 0) < int(time.time()):
+        return False
+    else:
+        return True
 
 
 def open_position(
@@ -119,6 +137,12 @@ def open_position(
             status=StatusTradeResult.TICKER_NOT_FOUND,
         )
 
+    if not check_symbol_market_opened(order.ticker):
+        return OpenRequestTradeResult(
+            detail="Market currently closed",
+            status=StatusTradeResult.MARKET_CLOSED,
+        )
+
     if not order.risk_management:
         volume: float = risk_management.compute_volume()
     else:
@@ -132,10 +156,10 @@ def open_position(
     match order.operation:
         case Position.BUY:
             position = mt5.POSITION_TYPE_BUY
-            price: float = get_bid_of_symbol()
+            price: float = get_bid_of_symbol(symbol=order.ticker)
         case Position.SELL:
             position = mt5.POSITION_TYPE_SELL
-            price: float = get_ask_of_symbol()
+            price: float = get_ask_of_symbol(symbol=order.ticker)
         case _:
             return OpenRequestTradeResult(
                 detail="No specified operation has not been recognised",
@@ -145,6 +169,13 @@ def open_position(
     trade_id: int = random.randint(100000000, 999999999)
 
     filling = get_symbol_filling(order.ticker)
+
+    if filling is None:
+        return OpenRequestTradeResult(
+            detail="Unable to fetch the filling type for the specified ticker",
+            status=StatusTradeResult.NO_FILLING_TYPE_FOUND,
+        )
+
     request = {
         "action": mt5.TRADE_ACTION_DEAL,
         "symbol": order.ticker,
@@ -160,9 +191,14 @@ def open_position(
     take_profit: float = 0.0
     stop_loss: float = 0.0
 
-    match type(order.tp):
-        case type(float()):
-            take_profit = order.tp
+    match type(order.take_profit):
+        case float():
+            take_profit = (
+                price + order.take_profit
+                if position == mt5.POSITION_TYPE_BUY
+                else price - order.take_profit
+            )
+
         case _:
             take_profit: float | None = risk_management.adjust_take_profit()
             if not take_profit:
@@ -172,11 +208,21 @@ def open_position(
                         status=StatusTradeResult.NO_TAKE_PROFIT_SPECIFIED,
                     )
             else:
+                take_profit = (
+                    price + take_profit
+                    if position == mt5.POSITION_TYPE_BUY
+                    else price - take_profit
+                )
                 request["tp"] = take_profit
 
-    match type(order.sl):
-        case type(float()):
-            stop_loss = order.stop_loss
+    match type(order.stop_loss):
+        case float():
+            stop_loss = (
+                price - order.stop_loss
+                if position == mt5.POSITION_TYPE_BUY
+                else price + order.stop_loss
+            )
+            request["sl"] = stop_loss
         case _:
             stop_loss: float | None = risk_management.adjust_stop_loss()
 
@@ -187,16 +233,25 @@ def open_position(
                         status=StatusTradeResult.NO_STOP_LOSS_SPECIFIED,
                     )
             else:
-                request["sl"] = stop_loss
+                request["sl"] = (
+                    price - stop_loss
+                    if position == mt5.POSITION_TYPE_BUY
+                    else price + stop_loss
+                )
+
+    print(request)
+    print(mt5.symbol_info(order.ticker))
+    print(mt5.terminal_info())
 
     initialize()
     order_request = mt5.order_send(request)
-    if order_request.retcode != mt5.TRADE_RETCODE_DONE:
+
+    if not order_request or order_request.retcode != mt5.TRADE_RETCODE_DONE:
         return OpenRequestTradeResult(
             detail="Unable to correctly fill the order",
             status=StatusTradeResult.NO_ORDER_FILLING,
             error="An error occurred while filling the order",
-            error_code=order_request.retcode,
+            error_code=None if not order_request else order_request.retcode,
         )
     else:
         return OpenRequestTradeResult(
