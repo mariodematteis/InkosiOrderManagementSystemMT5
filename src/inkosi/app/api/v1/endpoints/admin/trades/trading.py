@@ -1,8 +1,9 @@
+from bson.objectid import ObjectId
 from fastapi import APIRouter, Response, status
 from fastapi.responses import JSONResponse
 
 from inkosi.api.metatrader import open_position
-from inkosi.api.schemas import OpenRequestTradeResult
+from inkosi.api.schemas import OpenRequestTradeResult, StatusTradeResult
 from inkosi.database.mongodb.database import MongoDBCrud
 from inkosi.database.mongodb.schemas import TradeRequest
 
@@ -13,18 +14,18 @@ router = APIRouter()
 async def position(order: TradeRequest) -> Response:
     mongodb = MongoDBCrud()
 
-    result: OpenRequestTradeResult = open_position()
+    result: OpenRequestTradeResult = open_position(order)
     match result.status:
-        case 0:
-            mongodb.add_trade(order)
+        case StatusTradeResult.ORDER_FILLED:
+            record_id: ObjectId | None = mongodb.add_trade(order)
+
             return JSONResponse(
                 content={
                     "detail": "Position correctly opened",
+                    "record": record_id,
                 },
                 status_code=status.HTTP_200_OK,
             )
-        case -1:
-            return JSONResponse(content={"detail": "Position "})
         case _:
             return JSONResponse(
                 content={
