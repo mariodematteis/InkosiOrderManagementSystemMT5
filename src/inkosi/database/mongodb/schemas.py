@@ -31,4 +31,11 @@ class TradeRequest:
     commission_broker: float | None = None
     commission_fund: float | None = None
     risk_management: bool | None = None
+    deal_id: int | None = None
     notes: dict | None = None
+    status: bool | None = None
+
+
+@dataclass
+class CloseTradeRequest:
+    record_id: str

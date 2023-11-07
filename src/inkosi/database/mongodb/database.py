@@ -189,21 +189,74 @@ class MongoDBCrud:
 
     def get_all_trades(
         self,
+        opened: bool | None = None,
     ) -> list[dict]:
         trades_collection: Collection = self.mongodb_instance.database[
             get_mongodb_collection().Trade
         ]
 
-        return list(
-            trades_collection.aggregate(
-                [
-                    {
-                        "$addFields": {
-                            "_id": {
-                                "$toString": "$_id",
+        match opened:
+            case bool():
+                return list(
+                    trades_collection.aggregate(
+                        [
+                            {
+                                "$match": {
+                                    "status": opened,
+                                },
                             },
-                        },
+                            {
+                                "$addFields": {
+                                    "_id": {
+                                        "$toString": "$_id",
+                                    },
+                                },
+                            },
+                        ]
+                    )
+                )
+            case _:
+                return list(
+                    trades_collection.aggregate(
+                        [
+                            {
+                                "$addFields": {
+                                    "_id": {
+                                        "$toString": "$_id",
+                                    },
+                                },
+                            },
+                        ]
+                    )
+                )
+
+    def get_deal_from_id(
+        self,
+        record_id: str,
+    ) -> TradeRequest:
+        trades_collection: Collection = self.mongodb_instance.database[
+            get_mongodb_collection().Trade
+        ]
+
+        records = trades_collection.aggregate(
+            [
+                {
+                    "$match": {
+                        "_id": ObjectId(
+                            record_id,
+                        ),
                     },
-                ]
-            )
+                },
+                {
+                    "$unset": "_id",
+                },
+            ],
         )
+
+        if not records:
+            logger.critical(message="No record has been found")
+            return
+
+        record = list(records)[0]
+
+        return TradeRequest(**record)
