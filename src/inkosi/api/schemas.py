@@ -13,6 +13,8 @@ class StatusTradeResult(IntEnum):
     NO_ORDER_FILLING: int = -7
     NO_FILLING_TYPE_FOUND: int = -8
     MARKET_CLOSED: int = -9
+    NO_DEAL_ID_FOUND: int = -10
+    NO_POSITION_ID_FOUND: int = -11
 
 
 @dataclass
@@ -20,5 +22,17 @@ class OpenRequestTradeResult:
     detail: str
     status: StatusTradeResult
     trade_id: int | None = None
+    deal_id: int | None = None
+    volume: float | None = None
+    error: str | None = None
+    error_code: int | None = None
+
+
+@dataclass
+class CloseRequestTradeResult:
+    detail: str
+    status: StatusTradeResult
+    profit: float | None = None
+    fee: float | None = None
     error: str | None = None
     error_code: int | None = None

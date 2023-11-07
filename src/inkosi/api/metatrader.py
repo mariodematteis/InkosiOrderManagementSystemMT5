@@ -7,7 +7,7 @@ from inkosi.log.log import Logger
 from inkosi.portfolio.risk_management import RiskManagement
 from inkosi.utils.settings import get_environmental_settings
 
-from .schemas import OpenRequestTradeResult, StatusTradeResult
+from .schemas import CloseRequestTradeResult, OpenRequestTradeResult, StatusTradeResult
 
 try:
     import MetaTrader5 as mt5
@@ -107,13 +107,14 @@ def get_bid_of_symbol(symbol: str) -> float:
 
 def check_symbol_market_opened(symbol: str) -> bool:
     symbol_information = mt5.symbol_info(symbol)
+
     if not symbol_information:
         logger.error(
             f"Unable to fetch information regarding the symbol specified: {symbol}"
         )
         return False
 
-    if symbol_information._asdict().get("time", 0) < int(time.time()):
+    if symbol_information._asdict().get("time", 0) < int(time.time()) - 1:
         return False
     else:
         return True
@@ -156,10 +157,10 @@ def open_position(
     match order.operation:
         case Position.BUY:
             position = mt5.POSITION_TYPE_BUY
-            price: float = get_bid_of_symbol(symbol=order.ticker)
+            price: float = get_ask_of_symbol(symbol=order.ticker)
         case Position.SELL:
             position = mt5.POSITION_TYPE_SELL
-            price: float = get_ask_of_symbol(symbol=order.ticker)
+            price: float = get_bid_of_symbol(symbol=order.ticker)
         case _:
             return OpenRequestTradeResult(
                 detail="No specified operation has not been recognised",
@@ -191,7 +192,7 @@ def open_position(
     take_profit: float = 0.0
     stop_loss: float = 0.0
 
-    match type(order.take_profit):
+    match order.take_profit:
         case float():
             take_profit = (
                 price + order.take_profit
@@ -215,7 +216,7 @@ def open_position(
                 )
                 request["tp"] = take_profit
 
-    match type(order.stop_loss):
+    match order.stop_loss:
         case float():
             stop_loss = (
                 price - order.stop_loss
@@ -239,127 +240,117 @@ def open_position(
                     else price + stop_loss
                 )
 
-    print(request)
-    print(mt5.symbol_info(order.ticker))
-    print(mt5.terminal_info())
-
-    initialize()
     order_request = mt5.order_send(request)
 
-    if not order_request or order_request.retcode != mt5.TRADE_RETCODE_DONE:
+    if not order_request:
         return OpenRequestTradeResult(
             detail="Unable to correctly fill the order",
             status=StatusTradeResult.NO_ORDER_FILLING,
             error="An error occurred while filling the order",
-            error_code=None if not order_request else order_request.retcode,
+        )
+
+    retcode = order_request._asdict().get("retcode", -1)
+    deal_id = order_request._asdict().get("deal", -1)
+
+    if retcode != mt5.TRADE_RETCODE_DONE or deal_id == -1:
+        return CloseRequestTradeResult(
+            detail="Unable to correctly fill the order",
+            status=StatusTradeResult.NO_ORDER_FILLING,
+            error="An error occurred while filling the order",
+            error_code=None if not order_request else retcode,
         )
     else:
         return OpenRequestTradeResult(
             detail="Order correctly filled",
             status=StatusTradeResult.ORDER_FILLED,
+            trade_id=trade_id,
+            deal_id=deal_id,
+            volume=volume,
         )
 
 
-# TODO: Rewrite
 def close_position(
     order: TradeRequest,
-    allow_no_risk_limits: bool,
-) -> OpenRequestTradeResult:
-    risk_management = RiskManagement()
+) -> CloseRequestTradeResult:
+    initialize()
+    deal = mt5.history_deals_get(ticket=order.deal_id)
 
-    if order.ticker is None:
-        return OpenRequestTradeResult(
-            detail="No Ticker has been provided",
-            status=StatusTradeResult.NO_TICKER_PROVIDED,
+    if not deal:
+        return CloseRequestTradeResult(
+            detail="No Deal with the specified ID has been found",
+            status=StatusTradeResult.NO_DEAL_ID_FOUND,
         )
 
-    if not check_for_financial_product_existence(order.ticker):
-        return OpenRequestTradeResult(
-            detail="Ticker provided doesn't exist",
-            status=StatusTradeResult.TICKER_NOT_FOUND,
+    position_id = mt5.positions_get(ticket=deal[0].position_id)[0].ticket
+
+    if not position_id:
+        return CloseRequestTradeResult(
+            detail="No Position with the specified ID has been found",
+            status=StatusTradeResult.NO_POSITION_ID_FOUND,
         )
 
-    if not order.risk_management:
-        volume: float = risk_management.compute_volume()
-    else:
-        volume: float | None = order.volume
-        if not volume:
-            return OpenRequestTradeResult(
-                detail="No volume has been provided",
-                status=StatusTradeResult.NO_VOLUME_PROVIDED,
-            )
+    volume: float | None = order.volume
+    if not volume:
+        return CloseRequestTradeResult(
+            detail="No volume has been provided",
+            status=StatusTradeResult.NO_VOLUME_PROVIDED,
+        )
 
     match order.operation:
         case Position.BUY:
-            position = mt5.POSITION_TYPE_BUY
-            price: float = get_bid_of_symbol()
-        case Position.SELL:
             position = mt5.POSITION_TYPE_SELL
-            price: float = get_ask_of_symbol()
+            price: float = get_bid_of_symbol(symbol=order.ticker)
+        case Position.SELL:
+            position = mt5.POSITION_TYPE_BUY
+            price: float = get_ask_of_symbol(symbol=order.ticker)
         case _:
-            return OpenRequestTradeResult(
+            return CloseRequestTradeResult(
                 detail="No specified operation has not been recognised",
                 status=StatusTradeResult.NO_OPERATION_SPECIFIED,
             )
 
-    trade_id: int = random.randint(100000000, 999999999)
-
     filling = get_symbol_filling(order.ticker)
+
+    if filling is None:
+        return OpenRequestTradeResult(
+            detail="Unable to fetch the filling type for the specified ticker",
+            status=StatusTradeResult.NO_FILLING_TYPE_FOUND,
+        )
+
     request = {
         "action": mt5.TRADE_ACTION_DEAL,
         "symbol": order.ticker,
         "volume": volume,
         "type": position,
         "price": price,
-        "deviation": 20,
-        "magic": trade_id,
-        "type_time": mt5.ORDER_TIME_GTC,
-        "type_filling": filling,
+        "position": position_id,
     }
 
-    take_profit: float = 0.0
-    stop_loss: float = 0.0
-
-    match type(order.tp):
-        case type(float()):
-            take_profit = order.tp
-        case _:
-            take_profit: float | None = risk_management.adjust_take_profit()
-            if not take_profit:
-                if not allow_no_risk_limits:
-                    return OpenRequestTradeResult(
-                        detail="No Take Profit has been specified",
-                        status=StatusTradeResult.NO_TAKE_PROFIT_SPECIFIED,
-                    )
-            else:
-                request["tp"] = take_profit
-
-    match type(order.sl):
-        case type(float()):
-            stop_loss = order.stop_loss
-        case _:
-            stop_loss: float | None = risk_management.adjust_stop_loss()
-
-            if not stop_loss:
-                if not allow_no_risk_limits:
-                    return OpenRequestTradeResult(
-                        detail="No Stop Loss has been specified",
-                        status=StatusTradeResult.NO_STOP_LOSS_SPECIFIED,
-                    )
-            else:
-                request["sl"] = stop_loss
-
-    initialize()
     order_request = mt5.order_send(request)
-    if order_request.retcode != mt5.TRADE_RETCODE_DONE:
-        return OpenRequestTradeResult(
+
+    if not order_request:
+        return CloseRequestTradeResult(
             detail="Unable to correctly fill the order",
             status=StatusTradeResult.NO_ORDER_FILLING,
             error="An error occurred while filling the order",
-            error_code=order_request.retcode,
+        )
+
+    retcode = order_request._asdict().get("retcode", -1)
+    deal_id = order_request._asdict().get("deal", -1)
+
+    deal_information = mt5.history_deals_get(ticket=deal_id)
+
+    if retcode != mt5.TRADE_RETCODE_DONE or not deal_information:
+        return CloseRequestTradeResult(
+            detail="Unable to correctly fill the order",
+            status=StatusTradeResult.NO_ORDER_FILLING,
+            error="An error occurred while filling the order",
+            error_code=None if not order_request else retcode,
         )
     else:
-        return OpenRequestTradeResult(
+        return CloseRequestTradeResult(
             detail="Order correctly filled",
             status=StatusTradeResult.ORDER_FILLED,
+            profit=deal_information[0]._asdict().get("profit", None),
+            fee=deal_information[0]._asdict().get("fee", None),
         )
