@@ -1,7 +1,6 @@
 import requests
 import streamlit as st
 from fastapi import status
-from streamlit_modal import Modal
 
 from inkosi.database.postgresql.database import PostgreSQLCrud
 from inkosi.database.postgresql.schemas import FundInformation
@@ -27,12 +26,6 @@ def get_authentication() -> bool:
     return result
 
 
-modal = Modal(title="Fund Settings", key="cw")
-if modal.is_open():
-    with modal.container():
-        st.write("Fund Name")
-
-
 def set_token(token: str) -> None:
     session = st.session_state
     session["token"] = token
@@ -50,7 +43,7 @@ if state:
 
     fund_selected = st.sidebar.selectbox("Fund Name", options=["pROVA", "dadw"])
     st.sidebar.text(
-        f"""
+        body="""
         Investment Firm: {fund_information.investment_firm}
         Fund Name: {fund_information.fund_name}
         Administrator: {', '.join(administrator for administrator in fund_information.administrators)}
@@ -60,8 +53,32 @@ if state:
         """
     )
 
-    if st.sidebar.button("Settings"):
-        modal.open()
+    investor_expander = st.sidebar.expander(label="Investor")
+    investor_expander.text_input(
+        label="Investor",
+        placeholder="New Investor",
+        label_visibility="hidden",
+    )
+    if investor_expander.button("Add Investor"):
+        ...
+
+    administrator_expander = st.sidebar.expander(label="Administrator")
+    administrator_expander.text_input(
+        label="E-mail Address",
+        placeholder="E-mail Address",
+        label_visibility="hidden",
+    )
+    if administrator_expander.button("Add Admininistrator"):
+        ...
+
+    ats_expander = st.sidebar.expander(label="Algorithmic Trading Strategy")
+    ats_expander.text_input(
+        label="Strategy Name",
+        placeholder="Strategy Name",
+        label_visibility="hidden",
+    )
+    if ats_expander.button("Add ATS"):
+        ...
 
     st.markdown(
         "<h1 style='text-align:"
@@ -71,7 +88,7 @@ if state:
 
 
 else:
-    st.set_page_config(page_title="Inkosi Web App - Login")
+    # st.set_page_config(page_title="Inkosi Web App - Login")
 
     st.markdown(
         "<h1 style='text-align: center;'>Inkosi Login</h1>", unsafe_allow_html=True

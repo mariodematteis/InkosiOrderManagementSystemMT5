@@ -34,6 +34,8 @@ async def login(
         password=credentials.password,
     )
 
+    print(records)
+
     match len(records):
         case 0:
             logger.warn(

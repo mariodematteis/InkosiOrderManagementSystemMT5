@@ -16,7 +16,7 @@ v1_router.include_router(
     router=administration_router,
     tags=["Administrator"],
     dependencies=[
-        Depends(authentication),
+        # Depends(authentication),
         Depends(network_policies_check),
     ],
 )

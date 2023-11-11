@@ -266,10 +266,10 @@ class PostgreSQLCrud:
         email_address: str,
     ) -> list[AdministratorProfile]:
         __query = (
-            f"SET search_path TO {get_postgresql_schema()}; SELECT CONCAT(first_name, '"
-            " ', second_name) AS full_name, first_name, second_name, email_address,"
-            f" policies, '{UserRole.ADMINISTRATOR}' AS role FROM administrators WHERE"
-            f" email_address = '{email_address}';"
+            f"SET search_path TO {get_postgresql_schema()}; SELECT id,"
+            " CONCAT(first_name, ' ', second_name) AS full_name, first_name,"
+            f" second_name, email_address, policies, '{UserRole.ADMINISTRATOR}' AS role"
+            f" FROM administrators WHERE email_address = '{email_address}';"
         )
 
         return [
