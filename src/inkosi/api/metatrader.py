@@ -21,6 +21,15 @@ logger = Logger(module_name="metatrader5", package_name="api")
 
 
 def check_mt5_available() -> bool:
+    """
+    Checking for Metea
+
+    Returns
+    -------
+    bool
+        _description_
+    """
+
     if not MT5_AVAILABLE:
         return False
 
