@@ -3,17 +3,20 @@ from hashlib import sha256
 from fastapi import APIRouter, Response, status
 from fastapi.responses import JSONResponse
 
-from inkosi.app.schemas import AdministratorRequest, Returns
+from inkosi.app.schemas import AdministratorRequest, InvestorRequest, Returns
+from inkosi.database.mongodb.database import MongoDBCrud
+from inkosi.database.mongodb.schemas import ReturnRequest
 from inkosi.database.postgresql.database import PostgreSQLCrud, PostgreSQLInstance
-from inkosi.database.postgresql.models import Administrator
+from inkosi.database.postgresql.models import Administrator, Investor
 from inkosi.database.postgresql.schemas import (
     AddAdministratorToFund,
     AddInvestorToFund,
     AdministratorProfile,
     Commission,
     Fund,
+    FundInformation,
+    InvestorProfile,
     PoliciesUpdate,
-    ReturnRequest,
 )
 from inkosi.utils.settings import get_api_settings
 
@@ -52,6 +55,30 @@ async def create_administrator(administrator_request: AdministratorRequest):
     return postgres.get_administrator_by_email_address(
         email_address=administrator.email_address
     )
+
+
+@router.post(
+    path="/create_investor",
+    response_model=list[InvestorProfile],
+)
+async def create_investor(investor_request: InvestorRequest):
+    postgres_instance = PostgreSQLInstance()
+
+    investor = Investor(
+        first_name=investor_request.first_name,
+        second_name=investor_request.second_name,
+        email_address=investor_request.email_address,
+        birthday=investor_request.birthday,
+        fiscal_code=investor_request.fiscal_code,
+        password=sha256(investor_request.password.encode()).hexdigest(),
+        policies=investor_request.policies,
+        active=investor_request.active,
+    )
+
+    postgres_instance.add(model=[investor])
+
+    postgres = PostgreSQLCrud()
+    return postgres.get_investor_by_email_address(email_address=investor.email_address)
 
 
 @router.get(
@@ -107,7 +134,18 @@ async def list_funds(status: bool | None = None):
 
 @router.post(path="/returns", response_model=Returns)
 async def returns(return_request: ReturnRequest):
-    ...
+    postgres = PostgreSQLCrud()
+    fund_information: FundInformation = postgres.get_fund_information(
+        return_request.fund_name
+    )
+
+    initial_capital: float = sum(fund_information.capital_distribution.values())
+
+    mongodb = MongoDBCrud()
+    result = mongodb.get_returns(fund=fund_information.id)
+
+    for record in result:
+        ...
 
 
 @router.put(

@@ -195,7 +195,10 @@ async def fund_information(
             )
         case 1:
             return JSONResponse(
-                content={"detail": "Fund information correctly fetched"},
+                content={
+                    "detail": "Fund information correctly fetched",
+                    "result": asdict(records[0]),
+                },
                 status_code=status.HTTP_200_OK,
             )
         case _:
