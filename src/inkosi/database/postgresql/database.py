@@ -277,6 +277,22 @@ class PostgreSQLCrud:
             for row in self.postgresql_instance.select(query=__query)
         ]
 
+    def get_investor_by_email_address(
+        self,
+        email_address: str,
+    ) -> list[AdministratorProfile]:
+        __query = (
+            f"SET search_path TO {get_postgresql_schema()}; SELECT id,"
+            " CONCAT(first_name, ' ', second_name) AS full_name, first_name,"
+            f" second_name, email_address, policies, '{UserRole.ADMINISTRATOR}' AS role"
+            f" FROM investors WHERE email_address = '{email_address}';"
+        )
+
+        return [
+            AdministratorProfile(**row._asdict())
+            for row in self.postgresql_instance.select(query=__query)
+        ]
+
     def get_portfolio_managers(
         self,
     ) -> list[AdministratorProfile]:
@@ -298,7 +314,8 @@ class PostgreSQLCrud:
     ) -> list[Fund]:
         __query = (
             f"SET search_path TO {get_postgresql_schema()}; SELECT id, fund_name,"
-            " portfolio_managers, investors FROM funds"
+            " investment_firm, administrator, investors, capital_distribution,"
+            " commission_type, commission_value FROM funds"
         )
 
         return [
@@ -349,12 +366,17 @@ class PostgreSQLCrud:
         self.postgresql_instance.update(query=__query)
         return True
 
-    def get_fund_information(self, fund_name: str) -> FundInformation:
+    def get_fund_information(self, fund_name: str | None) -> FundInformation:
+        where_clause = f"WHERE fund_name = '{fund_name}';"
+
+        if fund_name is None:
+            where_clause = ";"
+
         __query = (
-            f"SET search_path TO {get_postgresql_schema()}; SELECT investment_firm,"
-            " fund_name, administrators, investors, capital_distribution,"
-            " commission_type, commission_value, array['Sample1', 'Sample2']::text"
-            f" FROM funds WHERE fund_name = '{fund_name}';"
+            f"SET search_path TO {get_postgresql_schema()}; SELECT id, investment_firm,"
+            " fund_name, administrator, investors, capital_distribution,"
+            " commission_type, commission_value, array['Sample1', 'Sample2']::text AS"
+            f" strategies FROM funds {where_clause}"
         )
 
         return [

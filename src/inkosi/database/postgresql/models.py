@@ -69,6 +69,7 @@ class Funds(get_instance().base):
     commission_type: str = Column(String, default="percentual")
     commission_value: str = Column(Float, default=0.0)
     risk_limits: bool = Column(Boolean, default=False)
+    raising_funds: bool = Column(Boolean, default=True)
 
 
 class Authentication(get_instance().base):

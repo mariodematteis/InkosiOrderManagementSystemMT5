@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import date
 
 from inkosi.utils.utils import EnhancedStrEnum
 
@@ -39,3 +40,10 @@ class TradeRequest:
 @dataclass
 class CloseTradeRequest:
     record_id: str
+
+
+@dataclass
+class ReturnRequest:
+    fund_name: str
+    date_from: date
+    date_to: date
