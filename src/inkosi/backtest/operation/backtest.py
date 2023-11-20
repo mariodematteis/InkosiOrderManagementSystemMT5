@@ -1,9 +1,12 @@
 import numpy as np
+import pandas as pd
+import pandas_ta as ta
 import torch
 from numpy.typing import NDArray
 
 from inkosi.database.mongodb.schemas import Position
 from inkosi.log.log import Logger
+from inkosi.utils.settings import get_technical_indicators_values
 
 from .models import (
     TICKS_ASK_INDEX,
@@ -14,12 +17,97 @@ from .models import (
     TradeResult,
     TradeStatus,
 )
+from .schemas import (
+    AvailableRawColumns,
+    AvailableTechincalIndicators,
+    ComparisonElement,
+    Elements,
+    Filter,
+    Relation,
+)
 
 logger = Logger(
     module_name="backtest",
     package_name="backtest",
     database=False,
 )
+
+
+def technical_column(
+    data_frame: pd.DataFrame,
+    column_type: AvailableRawColumns | AvailableTechincalIndicators | None,
+    additional_information: dict,
+) -> NDArray:
+    if AvailableRawColumns.has(column_type):
+        return data_frame[column_type]
+
+    match column_type:
+        case AvailableTechincalIndicators.SMA:
+            return data_frame.ta.sma(
+                close=data_frame[Elements.CLOSE_PRICE],
+                length=additional_information.get(
+                    Elements.PERIOD,
+                    get_technical_indicators_values().MovingAveragePeriod,
+                ),
+            ).to_numpy()
+        case AvailableTechincalIndicators.WMA:
+            return data_frame.ta.sma(
+                close=data_frame[Elements.CLOSE_PRICE],
+                length=additional_information.get(
+                    Elements.PERIOD,
+                    get_technical_indicators_values().MovingAveragePeriod,
+                ),
+            ).to_numpy()
+        case AvailableTechincalIndicators.EMA:
+            return data_frame.ta.sma(
+                close=data_frame[Elements.CLOSE_PRICE],
+                length=additional_information(
+                    Elements.PERIOD,
+                    get_technical_indicators_values().MovingAveragePeriod,
+                ),
+            ).to_numpy()
+
+
+def filter_dataset(
+    data_frame: pd.DataFrame,
+    filters: list[Filter],
+) -> NDArray:
+    indexes_list = set(data_frame.index)
+
+    for _filter in filters:
+        first_element: ComparisonElement = _filter.first_element
+        second_element: ComparisonElement = _filter.second_element
+        relation: Relation = _filter.relation
+
+        first_column: NDArray = technical_column(
+            data_frame=data_frame,
+            technical_indicator=first_element.get(Elements.ELEMENT),
+        )
+
+        second_column: NDArray = technical_column(
+            data_frame,
+            technical_indicator=second_element.get(Elements.ELEMENT),
+        )
+
+        if not first_element or not second_column:
+            logger.critical("Unable to correctly identify the comparison")
+            continue
+
+        match relation:
+            case Relation.GREATER:
+                _indexes = np.nonzero(first_column > second_column)
+            case Relation.GREATER_THAN:
+                _indexes = np.nonzero(first_column >= second_column)
+            case Relation.LESS:
+                _indexes = np.nonzero(first_column < second_column)
+            case Relation.LESS_THAN:
+                _indexes = np.nonzero(first_column <= second_column)
+            case Relation.EQUAL:
+                _indexes = np.nonzero(first_column == second_column)
+
+        indexes_list.intersection_update(_indexes)
+
+    return np.array(indexes_list)
 
 
 def checker(
