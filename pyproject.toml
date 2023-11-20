@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 dependencies = [
-  "MetaTrader5==5.0.45",
+  #"MetaTrader5==5.0.45",
   "SQLAlchemy==2.0.21",
   "beartype==0.16.2",
   "fastapi[all]==0.103.2",
@@ -28,15 +28,16 @@ dependencies = [
   "numpy==1.26.0",
   "omegaconf==2.3.0",
   "pandas==2.1.2",
+  "pandas_ta==0.3.14b0",
   "psycopg2-binary==2.9.9",
   "pydantic-settings==2.0.3",
   "pydantic==2.4.2",
   "pymongo==4.5.0",
   "sqlalchemy-utils==0.41.1",
-  "streamlit-modal==0.1.0",
   "streamlit==1.28.0",
   "ta==0.10.3",
   "torch==2.1.0",
+  "yfinance==0.2.31",
 ]
 
 [project.optional-dependencies]
@@ -52,7 +53,7 @@ dev = [
 docs = [
   "mkdocs",
   "mkdocs-material",
-  "mkdocstrings[python]",
+  "mkdocstrings-python",
   "pytkdocs[numpy-style]",
 ]
 test = [
