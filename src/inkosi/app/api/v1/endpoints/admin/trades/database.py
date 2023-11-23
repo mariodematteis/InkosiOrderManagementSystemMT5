@@ -9,6 +9,7 @@ router = APIRouter()
 
 @router.post(
     path="/trade",
+    summary="",
     response_class=JSONResponse,
 )
 async def add_trade(
@@ -28,6 +29,7 @@ async def add_trade(
 
 @router.put(
     path="/trade/{trade_id}",
+    summary="",
     response_class=JSONResponse,
 )
 async def update_trade(
@@ -59,6 +61,7 @@ async def update_trade(
 
 @router.get(
     path="/trade/{trade_id}",
+    summary="",
     response_class=JSONResponse,
 )
 async def get_trade(
@@ -75,6 +78,7 @@ async def get_trade(
 
 @router.get(
     path="/all_trades",
+    summary="",
     response_class=JSONResponse,
 )
 async def get_all_trades():
@@ -89,6 +93,7 @@ async def get_all_trades():
 
 @router.delete(
     path="/trade/{trade_id}",
+    summary="",
     response_class=JSONResponse,
 )
 async def delete_trade(

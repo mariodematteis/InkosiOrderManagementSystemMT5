@@ -50,7 +50,7 @@ else:
         st.markdown(
             """
             It is important to recognize
-            ... 
+            ...
             """
         )
 

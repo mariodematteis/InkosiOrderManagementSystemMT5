@@ -260,3 +260,45 @@ class MongoDBCrud:
         record = list(records)[0]
 
         return TradeRequest(**record)
+
+    def get_returns(
+        self,
+        fund: int,
+    ) -> list[dict]:
+        trades_collection: Collection = self.mongodb_instance.database[
+            get_mongodb_collection().Trade
+        ]
+
+        records = trades_collection.aggregate(
+            [
+                {
+                    "$addFields": {
+                        "datetime": {
+                            "$toDate": "$_id",
+                        },
+                        "_id": {
+                            "$toString": "$_id",
+                        },
+                    },
+                },
+                {
+                    "$match": {
+                        "fund": fund,
+                        "status": False,
+                    },
+                },
+                {
+                    "$sort": {
+                        "datetime": 1,
+                    },
+                },
+            ]
+        )
+
+        # TODO: Group by date
+
+        if not records:
+            logger.critical(message="No record has been found")
+            return
+
+        return list(records)

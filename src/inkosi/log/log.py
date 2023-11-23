@@ -18,6 +18,9 @@ class Logger:
         formatter: str = "[%(asctime)s\t %(levelname)s\t %(name)s] %(message)s",
         **kwargs,
     ) -> None:
+        """
+        _summary_
+        """
         self.module_name = module_name
         self.package_name = None
 

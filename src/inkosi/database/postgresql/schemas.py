@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 
 from inkosi.utils.utils import EnhancedStrEnum
 
@@ -45,11 +45,27 @@ class AdministratorProfile:
 
 
 @dataclass
+class InvestorProfile:
+    id: int
+    full_name: str
+    first_name: str
+    second_name: str
+    email_address: str
+    policies: list[str]
+    role: str
+
+
+@dataclass
 class Fund:
     id: str
     fund_name: str
-    portfolio_managers: list[str]
+    investment_firm: str
+    created_at: date
+    administrator: list[str]
     investors: list[str]
+    capital_distribution: dict
+    commission_type: str
+    commission_value: str
 
 
 @dataclass
@@ -62,11 +78,6 @@ class AuthenticationOutput:
 
 
 @dataclass
-class ReturnRequest:
-    fund_name: str
-
-
-@dataclass
 class LoginCredentials:
     email_address: str
     password: str
@@ -74,14 +85,17 @@ class LoginCredentials:
 
 @dataclass
 class FundInformation:
-    investment_firm: str
+    id: int
     fund_name: str
-    administrators: list[str]
-    investors: list[str]
-    strategies: list[str]
-    capital_distribution: dict
-    commission_type: str
-    commission_value: str
+    created_at: date
+    investment_firm: str = ""
+    administrator: list[str] = field(default_factory=[])
+    investors: list[str] = field(default_factory=[])
+    capital_distribution: dict = field(default_factory={})
+    commission_type: str = "-"
+    commission_value: str = "-"
+    strategies: list[str] = field(default_factory=[])
+    fund_raising: bool = False
 
 
 @dataclass
@@ -93,6 +107,7 @@ class RaiseNewFund:
     administrators: list[int]
     investors: list[str] = field(default_factory=[])
     capital_distribution: dict = field(default_factory={})
+    created_at: date = field(default=datetime.today())
 
 
 @dataclass

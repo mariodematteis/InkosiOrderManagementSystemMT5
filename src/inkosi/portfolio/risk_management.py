@@ -63,3 +63,8 @@ class RiskManagement(metaclass=RiskManagementMetaclass):
         self,
     ) -> float:
         return 5.0
+
+    def unload_model(
+        self,
+    ) -> None:
+        return

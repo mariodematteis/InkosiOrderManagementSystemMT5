@@ -79,12 +79,18 @@ class RiskManagement:
 
 
 @dataclass
+class TechnicalIndicators:
+    MovingAveragePeriod: int | float
+
+
+@dataclass
 class Settings:
     PostgreSQL: PostgreSQL
     MongoDB: MongoDB
     API: API
     Policies: Policies
     RiskManagement: RiskManagement
+    TechnicalIndicators: TechnicalIndicators
 
     DockerInstance: bool
 
@@ -103,6 +109,9 @@ def get_settings() -> Settings:
             "config.yaml",
         ),
     )
+
+    print(settings_import)
+
     return OmegaConf.structured(
         Settings(**settings_import),
     )
@@ -193,3 +202,8 @@ def get_risk_management() -> RiskManagement:
 @lru_cache
 def get_risk_management_models() -> list | None:
     return get_risk_management().Models
+
+
+@lru_cache
+def get_technical_indicators_values() -> TechnicalIndicators:
+    return get_settings().TechnicalIndicators

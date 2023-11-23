@@ -63,12 +63,14 @@ class Funds(get_instance().base):
     )
     fund_name: str = Column(String, nullable=False, unique=True)
     investment_firm: str = Column(String, nullable=True)
+    created_at: date = Column(Date, nullable=False)
     administrators: list[int] = Column(ARRAY(Integer), default=[])
     investors: list[int] = Column(ARRAY(Integer), default=[])
     capital_distribution: dict = Column(JSONB, default={})
     commission_type: str = Column(String, default="percentual")
     commission_value: str = Column(Float, default=0.0)
     risk_limits: bool = Column(Boolean, default=False)
+    raising_funds: bool = Column(Boolean, default=True)
 
 
 class Authentication(get_instance().base):

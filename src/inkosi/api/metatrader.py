@@ -17,10 +17,22 @@ except ImportError:
     MT5_AVAILABLE = False
 
 
-logger = Logger(module_name="metatrader5", package_name="api")
+logger = Logger(
+    module_name="metatrader5",
+    package_name="api",
+)
 
 
 def check_mt5_available() -> bool:
+    """
+    Checking for Metea
+
+    Returns
+    -------
+    bool
+        _description_
+    """
+
     if not MT5_AVAILABLE:
         return False
 
@@ -55,7 +67,9 @@ def get_all_symbols_available() -> list[str] | None:
     logger.critical("No symbols have been found")
 
 
-def check_for_financial_product_existence(financial_product: str) -> bool:
+def check_for_financial_product_existence(
+    financial_product: str,
+) -> bool:
     symbols_list = get_all_symbols_available()
     if not symbols_list:
         return False
@@ -63,14 +77,16 @@ def check_for_financial_product_existence(financial_product: str) -> bool:
     return financial_product in symbols_list
 
 
-def check_for_positions_opened_on_symbol(symbol: str) -> int | None:
+def check_for_positions_opened_on_symbol(
+    symbol: str,
+) -> int | None:
     if not initialize():
         return
     return mt5.positions_get(symbol=symbol)
 
 
 # TODO: Add hinting
-def get_symbol_filling(symbol: str) -> int | None:
+def get_symbol_filling(symbol: str,) -> int | None:
     if not initialize() or not check_for_financial_product_existence(symbol):
         return
 
@@ -89,7 +105,9 @@ def get_symbol_filling(symbol: str) -> int | None:
 
 
 # TODO: Check if returns less or equal to 0 when the market is closed on that product
-def get_ask_of_symbol(symbol: str) -> float:
+def get_ask_of_symbol(
+    symbol: str,
+) -> float:
     ask = mt5.symbol_info_tick(symbol).ask
     if ask > 0:
         return ask
@@ -105,7 +123,9 @@ def get_bid_of_symbol(symbol: str) -> float:
         get_bid_of_symbol(symbol)
 
 
-def check_symbol_market_opened(symbol: str) -> bool:
+def check_symbol_market_opened(
+    symbol: str,
+) -> bool:
     symbol_information = mt5.symbol_info(symbol)
 
     if not symbol_information:

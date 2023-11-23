@@ -44,4 +44,7 @@ Policies:
 RiskManagement:
   Models:
 
+TechnicalIndicators:
+    MovingAveragePeriod: 20
+
 DockerInstance: false
