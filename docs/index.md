@@ -1,28 +1,28 @@
 # Home
 
-## Introduction
+## _Introduction_
 
-### Definition
+### __Definition__
 
 It is a **OMS** (Order Management System) written in _Python_ which interacts, through the MetaTrader5 library, with the MetaTrader5 Client. The project aims to offers a solid and reliable infrastructure able to quickly open and close trading positions.
 
-## Installation
+## _Installation_
 
-## Organisation & Hierarchy
+## _Organisation & Hierarchy_
 
-### Where does it come from?
+### __Where does it come from?__
 
-### Structural Design
+### __Structural Design__
 
-## Issues Tracker
+## _Issues Tracker_
 
-### GitHub Issues
+### __GitHub Issues__
 
 For any issues, please refers to [GitHub Issues](https://github.com/BopaxDev/Inkosi/issues)
 
-### E-mail Address
+### __E-mail Address__
 
-## Contact
+## _Contact_
 
 - [GitHub](https://github.com/BopaxDev)
 - [Linkedin](https://www.linkedin.com/in/mario-nicolo-de-matteis)

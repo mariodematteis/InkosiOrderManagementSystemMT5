@@ -80,7 +80,7 @@ class RiskManagement:
 
 @dataclass
 class TechnicalIndicators:
-    MovingAveragePeriod: int | float = 20
+    MovingAveragePeriod: int | float
 
 
 @dataclass
@@ -109,6 +109,9 @@ def get_settings() -> Settings:
             "config.yaml",
         ),
     )
+
+    print(settings_import)
+
     return OmegaConf.structured(
         Settings(**settings_import),
     )

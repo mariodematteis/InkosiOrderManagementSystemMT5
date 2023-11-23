@@ -6,14 +6,6 @@ API: str = "/api"
 V1: str = "/v1"
 
 
-class webpages:
-    """
-    Class contatining all the webpages
-    """
-
-    LOGIN: str = "login.html"
-
-
 class v1:
     """
     Class containing all the paths to access API v1

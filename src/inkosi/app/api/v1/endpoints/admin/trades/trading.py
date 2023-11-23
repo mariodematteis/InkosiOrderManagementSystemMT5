@@ -1,7 +1,7 @@
 from dataclasses import asdict
 
 from bson.objectid import ObjectId
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
 from inkosi.api.metatrader import close_position, open_position
@@ -13,13 +13,19 @@ from inkosi.api.schemas import (
 from inkosi.database.mongodb.database import MongoDBCrud
 from inkosi.database.mongodb.schemas import CloseTradeRequest, TradeRequest
 
-router = APIRouter(prefix="/trading")
+router = APIRouter(
+    prefix="/trading",
+)
 
 
-@router.post(path="/position")
+@router.post(
+    path="/position",
+    summary="",
+    response_class=JSONResponse,
+)
 async def position_opening(
     order: TradeRequest,
-) -> Response:
+):
     mongodb = MongoDBCrud()
 
     result: OpenRequestTradeResult = open_position(
@@ -50,10 +56,14 @@ async def position_opening(
             )
 
 
-@router.get(path="/position")
+@router.get(
+    path="/position",
+    summary="",
+    response_class=JSONResponse,
+)
 async def position_information(
     opened: bool | None = None,
-) -> Response:
+):
     mongodb = MongoDBCrud()
 
     result: OpenRequestTradeResult = mongodb.get_all_trades(opened=opened)
@@ -63,10 +73,14 @@ async def position_information(
     )
 
 
-@router.delete(path="/position")
+@router.delete(
+    path="/position",
+    summary="",
+    response_class=JSONResponse,
+)
 async def position_closing(
     close_trade_request: CloseTradeRequest,
-) -> Response:
+):
     mongodb = MongoDBCrud()
 
     record = mongodb.get_deal_from_id(record_id=close_trade_request.record_id)

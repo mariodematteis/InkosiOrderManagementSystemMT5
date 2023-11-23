@@ -20,14 +20,21 @@ from inkosi.mailing.schemas import EmailReceivedAdministratorFundRaising
 
 router = APIRouter()
 
-logger = Logger(module_name="Profile", package_name="api")
+logger = Logger(
+    module_name="Profile",
+    package_name="api",
+)
 
 
-@router.get(path="/login")
+@router.get(
+    path="/login",
+    summary="",
+    response_class=JSONResponse,
+)
 async def login(
     credentials: LoginCredentials,
     request: Request,
-) -> Response:
+):
     postgresql = PostgreSQLCrud()
     records = postgresql.get_users(
         email_address=credentials.email_address,
@@ -143,8 +150,14 @@ async def login(
             )
 
 
-@router.post(path="/fund")
-async def raise_fund(raise_new_fund: RaiseNewFund) -> Response:
+@router.post(
+    path="/fund",
+    summary="",
+    response_class=JSONResponse,
+)
+async def raise_fund(
+    raise_new_fund: RaiseNewFund,
+):
     postgresql = PostgreSQLCrud()
 
     fund = Funds(**asdict(raise_new_fund))
@@ -173,7 +186,11 @@ async def raise_fund(raise_new_fund: RaiseNewFund) -> Response:
         )
 
 
-@router.get(path="/fund")
+@router.get(
+    path="/fund",
+    summary="",
+    response_class=JSONResponse,
+)
 async def fund_information(
     fund_name: str,
     request: Request,

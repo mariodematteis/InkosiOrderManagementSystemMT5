@@ -63,6 +63,7 @@ class Funds(get_instance().base):
     )
     fund_name: str = Column(String, nullable=False, unique=True)
     investment_firm: str = Column(String, nullable=True)
+    created_at: date = Column(Date, nullable=False)
     administrators: list[int] = Column(ARRAY(Integer), default=[])
     investors: list[int] = Column(ARRAY(Integer), default=[])
     capital_distribution: dict = Column(JSONB, default={})

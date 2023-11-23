@@ -374,7 +374,7 @@ class PostgreSQLCrud:
 
         __query = (
             f"SET search_path TO {get_postgresql_schema()}; SELECT id, investment_firm,"
-            " fund_name, administrator, investors, capital_distribution,"
+            " fund_name, created_at, administrator, investors, capital_distribution,"
             " commission_type, commission_value, array['Sample1', 'Sample2']::text AS"
             f" strategies FROM funds {where_clause}"
         )

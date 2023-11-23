@@ -60,6 +60,7 @@ class Fund:
     id: str
     fund_name: str
     investment_firm: str
+    created_at: date
     administrator: list[str]
     investors: list[str]
     capital_distribution: dict
@@ -86,6 +87,7 @@ class LoginCredentials:
 class FundInformation:
     id: int
     fund_name: str
+    created_at: date
     investment_firm: str = ""
     administrator: list[str] = field(default_factory=[])
     investors: list[str] = field(default_factory=[])
@@ -105,6 +107,7 @@ class RaiseNewFund:
     administrators: list[int]
     investors: list[str] = field(default_factory=[])
     capital_distribution: dict = field(default_factory={})
+    created_at: date = field(default=datetime.today())
 
 
 @dataclass

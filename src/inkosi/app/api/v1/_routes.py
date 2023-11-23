@@ -8,6 +8,8 @@ from .endpoints.admin.operations import router as operations_router
 from .endpoints.admin.scheduler import router as scheduler_router
 from .endpoints.admin.trades.database import router as database_trading_router
 from .endpoints.admin.trades.trading import router as trading_router
+from .endpoints.investor.backtest import router as investor_backtest_router
+from .endpoints.investor.operations import router as investor_operations_router
 from .endpoints.profile import router as profile_router
 
 v1_router = APIRouter()
@@ -22,7 +24,7 @@ v1_router.include_router(
 )
 v1_router.include_router(
     router=operations_router,
-    tags=["Operations"],
+    tags=["Administrator Operations"],
     dependencies=[
         Depends(authentication),
         Depends(network_policies_check),
@@ -41,6 +43,16 @@ v1_router.include_router(
     router=trading_router,
     tags=["Trading"],
 )
+
+v1_router.include_router(
+    router=investor_operations_router,
+    tags=["Investor Operations"],
+)
+v1_router.include_router(
+    router=investor_backtest_router,
+    tags=["Investor Backtest"],
+)
+
 v1_router.include_router(
     router=profile_router,
     tags=["Profile"],

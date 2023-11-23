@@ -295,6 +295,8 @@ class MongoDBCrud:
             ]
         )
 
+        # TODO: Group by date
+
         if not records:
             logger.critical(message="No record has been found")
             return

@@ -1,7 +1,5 @@
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 
 from inkosi import __project_name__, __version__
 from inkosi.app import _constants
@@ -15,11 +13,14 @@ _API_HEALTHCHECK = "OK"
 _API_DESCRIPTION = "Inkosi API"
 _API_STATUS = "active"
 
-logger = Logger(module_name="Main", package_name="app")
+logger = Logger(
+    module_name="Main",
+    package_name="app",
+)
 
-templates = Jinja2Templates(directory="templates")
-
-app = FastAPI(title=_constants.APPLICATION_NAME)
+app = FastAPI(
+    title=_constants.APPLICATION_NAME,
+)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -33,7 +34,9 @@ app.include_router(
 )
 
 
-@app.on_event("startup")
+@app.on_event(
+    event_type="startup",
+)
 async def startup_event() -> None:
     mongo_manager = MongoDBInstance()
     if not mongo_manager.is_connected():
@@ -44,35 +47,11 @@ async def startup_event() -> None:
     RiskManagement()
 
 
-@app.on_event(event_type="shutdown")
-async def shutdown() -> None:
-    ...
-
-
-@app.get(
-    path="/",
-    summary="WebPage for logging to the platform",
-    status_code=status.HTTP_200_OK,
-    response_class=HTMLResponse,
+@app.on_event(
+    event_type="shutdown",
 )
-async def login_page(request: Request):
-    """
-    Login WebPage Endpoint
-
-    Parameters
-    ----------
-    request : Request
-        Headers and other information
-
-    Returns
-    -------
-    _TemplateResponse
-        HTML Page for Login
-    """
-    return templates.TemplateResponse(
-        _constants.webpages.LOGIN,
-        context={"request": request},
-    )
+async def shutdown() -> None:
+    RiskManagement().unload_model()
 
 
 @app.get(

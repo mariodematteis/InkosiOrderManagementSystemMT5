@@ -1,11 +1,9 @@
 from hashlib import sha256
 
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
-from inkosi.app.schemas import AdministratorRequest, InvestorRequest, Returns
-from inkosi.database.mongodb.database import MongoDBCrud
-from inkosi.database.mongodb.schemas import ReturnRequest
+from inkosi.app.schemas import AdministratorRequest, InvestorRequest
 from inkosi.database.postgresql.database import PostgreSQLCrud, PostgreSQLInstance
 from inkosi.database.postgresql.models import Administrator, Investor
 from inkosi.database.postgresql.schemas import (
@@ -14,7 +12,6 @@ from inkosi.database.postgresql.schemas import (
     AdministratorProfile,
     Commission,
     Fund,
-    FundInformation,
     InvestorProfile,
     PoliciesUpdate,
 )
@@ -23,8 +20,12 @@ from inkosi.utils.settings import get_api_settings
 router = APIRouter()
 
 
-@router.get(path="/available_apis")
-async def return_available_apis() -> Response:
+@router.get(
+    path="/available_apis",
+    summary="",
+    response_class=JSONResponse,
+)
+async def return_available_apis():
     return JSONResponse(
         content={"detail": get_api_settings().APIs},
         status_code=status.HTTP_200_OK,
@@ -33,9 +34,12 @@ async def return_available_apis() -> Response:
 
 @router.post(
     path="/create_administrator",
+    summary="",
     response_model=list[AdministratorProfile],
 )
-async def create_administrator(administrator_request: AdministratorRequest):
+async def create_administrator(
+    administrator_request: AdministratorRequest,
+):
     postgres_instance = PostgreSQLInstance()
 
     administrator = Administrator(
@@ -59,9 +63,12 @@ async def create_administrator(administrator_request: AdministratorRequest):
 
 @router.post(
     path="/create_investor",
+    summary="",
     response_model=list[InvestorProfile],
 )
-async def create_investor(investor_request: InvestorRequest):
+async def create_investor(
+    investor_request: InvestorRequest,
+):
     postgres_instance = PostgreSQLInstance()
 
     investor = Investor(
@@ -83,9 +90,12 @@ async def create_investor(investor_request: InvestorRequest):
 
 @router.get(
     path="/list_portfolio_managers",
+    summary="",
     response_model=list[AdministratorProfile],
 )
-async def list_portfolio_managers(status: bool | None = None):
+async def list_portfolio_managers(
+    status: bool | None = None,
+):
     """
     Return the list of Active, Inactive or all Portfolio Managers
 
@@ -109,9 +119,12 @@ async def list_portfolio_managers(status: bool | None = None):
 
 @router.get(
     path="/list_funds",
+    summary="",
     response_model=list[Fund],
 )
-async def list_funds(status: bool | None = None):
+async def list_funds(
+    status: bool | None = None,
+):
     """
     Return the list of Active, Inactive or all Funds
 
@@ -132,27 +145,14 @@ async def list_funds(status: bool | None = None):
         return postgresql.get_funds()
 
 
-@router.post(path="/returns", response_model=Returns)
-async def returns(return_request: ReturnRequest):
-    postgres = PostgreSQLCrud()
-    fund_information: FundInformation = postgres.get_fund_information(
-        return_request.fund_name
-    )
-
-    initial_capital: float = sum(fund_information.capital_distribution.values())
-
-    mongodb = MongoDBCrud()
-    result = mongodb.get_returns(fund=fund_information.id)
-
-    for record in result:
-        ...
-
-
 @router.put(
     path="/update_policies",
-    response_class=Response,
+    summary="",
+    response_class=JSONResponse,
 )
-async def update_policies(policies_update: PoliciesUpdate):
+async def update_policies(
+    policies_update: PoliciesUpdate,
+):
     postgres = PostgreSQLCrud()
     result = postgres.update_policies(
         policies_update=policies_update,
@@ -174,8 +174,14 @@ async def update_policies(policies_update: PoliciesUpdate):
     )
 
 
-@router.post(path="/add_investor")
-async def add_investor(add_investor_to_fund: AddInvestorToFund) -> Response:
+@router.post(
+    path="/add_investor",
+    summary="",
+    response_model=JSONResponse,
+)
+async def add_investor(
+    add_investor_to_fund: AddInvestorToFund,
+):
     postgres = PostgreSQLCrud()
     result = postgres.add_investor_to_fund(
         add_investor_to_fund.investor_id,
@@ -198,10 +204,14 @@ async def add_investor(add_investor_to_fund: AddInvestorToFund) -> Response:
         )
 
 
-@router.post(path="/add_administrator")
+@router.post(
+    path="/add_administrator",
+    summary="",
+    response_class=JSONResponse,
+)
 async def add_administrator(
     add_administrator_to_fund: AddAdministratorToFund,
-) -> Response:
+):
     postgres = PostgreSQLCrud()
     result = postgres.add_administrator_to_fund(
         add_administrator_to_fund.administrator_id,
@@ -224,10 +234,14 @@ async def add_administrator(
         )
 
 
-@router.put(path="/update_commission")
+@router.put(
+    path="/update_commission",
+    summary="",
+    response_class=JSONResponse,
+)
 async def update_commission(
     commission: Commission,
-) -> Response:
+):
     postgres = PostgreSQLCrud()
     result = postgres.update_commission(commission=commission)
 

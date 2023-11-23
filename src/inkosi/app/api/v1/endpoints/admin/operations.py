@@ -2,7 +2,8 @@ import random
 import string
 from hashlib import sha256
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
 
 from inkosi.app.schemas import Mode
 from inkosi.database.postgresql.database import PostgreSQLCrud
@@ -11,10 +12,14 @@ from inkosi.database.postgresql.models import Authentication
 router = APIRouter()
 
 
-@router.post(path="/generate_token_backtest")
+@router.post(
+    path="/generate_token_backtest",
+    summary="",
+    response_class=JSONResponse,
+)
 async def generate_token_backtest(
     request: Request,
-) -> Response:
+):
     postgresql = PostgreSQLCrud()
 
     token_id: str = sha256(
