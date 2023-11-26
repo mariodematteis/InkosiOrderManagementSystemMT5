@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import date
 from functools import lru_cache
 from pathlib import Path
 
@@ -92,6 +93,9 @@ class Settings:
     RiskManagement: RiskManagement
     TechnicalIndicators: TechnicalIndicators
 
+    DefaultAdminstrator: dict[int, str | date | list]
+    DefaultInvestors: list[dict[int, str | date | list]]
+
     DockerInstance: bool
 
 
@@ -109,8 +113,6 @@ def get_settings() -> Settings:
             "config.yaml",
         ),
     )
-
-    print(settings_import)
 
     return OmegaConf.structured(
         Settings(**settings_import),
@@ -207,3 +209,13 @@ def get_risk_management_models() -> list | None:
 @lru_cache
 def get_technical_indicators_values() -> TechnicalIndicators:
     return get_settings().TechnicalIndicators
+
+
+@lru_cache
+def get_default_administrators() -> dict[int, str | date | list] | None:
+    return get_settings().DefaultAdminstrator
+
+
+@lru_cache
+def get_default_investors() -> list[dict[int, str | date | list]] | None:
+    return get_settings().DefaultInvestors
