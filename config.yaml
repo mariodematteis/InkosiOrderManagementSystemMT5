@@ -1,13 +1,13 @@
 PostgreSQL:
-  PROTOCOL: 'postgresql'
-  USERNAME: 'postgres'
-  PASSWORD: 'postgres'
-  HOSTNAME: 'localhost'
+  PROTOCOL: "postgresql"
+  USERNAME: "postgres"
+  PASSWORD: "postgres"
+  HOSTNAME: "localhost"
   PORT: 5432
-  DATABASE: 'Inkosi'
-  SCHEMA: 'development'
-  PARAMETERS: ''
-  
+  DATABASE: "Inkosi"
+  SCHEMA: "development"
+  PARAMETERS: ""
+
 MongoDB:
   PROTOCOL: mongodb
   USERNAME: test
@@ -15,18 +15,18 @@ MongoDB:
   HOSTNAME: localhost
   PORT: 27017
   DATABASE: production
-  PARAMETERS: ''
+  PARAMETERS: ""
   TLS: false
 
   COLLECTIONS:
-    Log: 'Logs'
-    Trade: 'Trades'
+    Log: "Logs"
+    Trade: "Trades"
 
 API:
-  AllowedIPAddresses: '*'
+  AllowedIPAddresses: "*"
   TokenAuthentication: true
   IPAddressCorrespondence: false
-  TimeActivity: 
+  TimeActivity:
     days: 0
     hours: 6
     minutes: 30
@@ -48,7 +48,7 @@ RiskManagement:
   Models:
 
 TechnicalIndicators:
-    MovingAveragePeriod: 20
+  MovingAveragePeriod: 20
 
 DefaultAdministrators:
   1234:
@@ -74,6 +74,3 @@ DefaultInvestors:
       - INVESTOR_SAMPLING_SCENARIOS
       - INVESTOR_BACKTEST_ALL
     active: True
-  
-
-DockerInstance: false
