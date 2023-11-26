@@ -36,15 +36,44 @@ API:
 
 Policies:
   Administrator:
-    - portfolio_manager_full_access
-    - administrator_full_access
+    - ADMINISTRATOR_IFM_FULL_ACCESS
+    - ADMINISTRATOR_FM_FULL_ACCESS
+    - ADMINISTRATOR_PM_FULL_ACCESS
   Investor:
-    - basic_investor_access
+    - INVESTOR_DASHBOARD_VISUALISATION
+    - INVESTOR_SAMPLING_SCENARIOS
+    - INVESTOR_BACKTEST_ALL
 
 RiskManagement:
   Models:
 
 TechnicalIndicators:
     MovingAveragePeriod: 20
+
+DefaultAdministrators:
+  1234:
+    first_name: Mario Nicolò
+    second_name: De Matteis
+    email_address: test@test.it
+    birthday: 1900-01-01
+    fiscal_code: test
+    password: test
+    policies:
+      - ADMINISTRATOR_IFM_FULL_ACCESS
+    active: True
+
+DefaultInvestors:
+  - first_name: Mario Nicolò
+    second_name: De Matteis
+    email_address: test@test.it
+    birthday: 1900-01-01
+    fiscal_code: test
+    password: test
+    policies:
+      - INVESTOR_DASHBOARD_VISUALISATION
+      - INVESTOR_SAMPLING_SCENARIOS
+      - INVESTOR_BACKTEST_ALL
+    active: True
+  
 
 DockerInstance: false
