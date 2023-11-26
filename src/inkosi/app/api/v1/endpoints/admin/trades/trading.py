@@ -21,11 +21,10 @@ router = APIRouter(
 @router.post(
     path="/position",
     summary="",
-    response_class=JSONResponse,
 )
 async def position_opening(
     order: TradeRequest,
-):
+) -> JSONResponse:
     mongodb = MongoDBCrud()
 
     result: OpenRequestTradeResult = open_position(
@@ -59,11 +58,10 @@ async def position_opening(
 @router.get(
     path="/position",
     summary="",
-    response_class=JSONResponse,
 )
 async def position_information(
     opened: bool | None = None,
-):
+) -> JSONResponse:
     mongodb = MongoDBCrud()
 
     result: OpenRequestTradeResult = mongodb.get_all_trades(opened=opened)
@@ -76,11 +74,10 @@ async def position_information(
 @router.delete(
     path="/position",
     summary="",
-    response_class=JSONResponse,
 )
 async def position_closing(
     close_trade_request: CloseTradeRequest,
-):
+) -> JSONResponse:
     mongodb = MongoDBCrud()
 
     record = mongodb.get_deal_from_id(record_id=close_trade_request.record_id)

@@ -15,11 +15,10 @@ router = APIRouter()
 @router.post(
     path="/generate_token_backtest",
     summary="",
-    response_class=JSONResponse,
 )
 async def generate_token_backtest(
     request: Request,
-):
+) -> JSONResponse:
     postgresql = PostgreSQLCrud()
 
     token_id: str = sha256(

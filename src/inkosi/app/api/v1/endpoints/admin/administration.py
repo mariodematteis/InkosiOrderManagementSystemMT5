@@ -23,11 +23,12 @@ router = APIRouter()
 @router.get(
     path="/available_apis",
     summary="",
-    response_class=JSONResponse,
 )
-async def return_available_apis():
+async def return_available_apis() -> JSONResponse:
     return JSONResponse(
-        content={"detail": get_api_settings().APIs},
+        content={
+            "detail": list(get_api_settings().APIs),
+        },
         status_code=status.HTTP_200_OK,
     )
 
@@ -148,11 +149,10 @@ async def list_funds(
 @router.put(
     path="/update_policies",
     summary="",
-    response_class=JSONResponse,
 )
 async def update_policies(
     policies_update: PoliciesUpdate,
-):
+) -> JSONResponse:
     postgres = PostgreSQLCrud()
     result = postgres.update_policies(
         policies_update=policies_update,
@@ -177,11 +177,10 @@ async def update_policies(
 @router.post(
     path="/add_investor",
     summary="",
-    response_model=JSONResponse,
 )
 async def add_investor(
     add_investor_to_fund: AddInvestorToFund,
-):
+) -> JSONResponse:
     postgres = PostgreSQLCrud()
     result = postgres.add_investor_to_fund(
         add_investor_to_fund.investor_id,
@@ -207,11 +206,10 @@ async def add_investor(
 @router.post(
     path="/add_administrator",
     summary="",
-    response_class=JSONResponse,
 )
 async def add_administrator(
     add_administrator_to_fund: AddAdministratorToFund,
-):
+) -> JSONResponse:
     postgres = PostgreSQLCrud()
     result = postgres.add_administrator_to_fund(
         add_administrator_to_fund.administrator_id,
@@ -237,11 +235,10 @@ async def add_administrator(
 @router.put(
     path="/update_commission",
     summary="",
-    response_class=JSONResponse,
 )
 async def update_commission(
     commission: Commission,
-):
+) -> JSONResponse:
     postgres = PostgreSQLCrud()
     result = postgres.update_commission(commission=commission)
 

@@ -10,11 +10,10 @@ router = APIRouter()
 @router.post(
     path="/trade",
     summary="",
-    response_class=JSONResponse,
 )
 async def add_trade(
     trade_request: TradeRequest,
-):
+) -> JSONResponse:
     mongodb = MongoDBCrud()
     result = mongodb.add_trade(trade_request)
 
@@ -30,12 +29,11 @@ async def add_trade(
 @router.put(
     path="/trade/{trade_id}",
     summary="",
-    response_class=JSONResponse,
 )
 async def update_trade(
     trade_id: str,
     trade_request: TradeRequest,
-):
+) -> JSONResponse:
     mongodb = MongoDBCrud()
     result = mongodb.update_trade(
         trade_id=trade_id,
@@ -62,7 +60,6 @@ async def update_trade(
 @router.get(
     path="/trade/{trade_id}",
     summary="",
-    response_class=JSONResponse,
 )
 async def get_trade(
     trade_id: str,
@@ -94,7 +91,6 @@ async def get_all_trades():
 @router.delete(
     path="/trade/{trade_id}",
     summary="",
-    response_class=JSONResponse,
 )
 async def delete_trade(
     trade_id: str,

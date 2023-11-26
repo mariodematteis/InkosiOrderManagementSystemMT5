@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 dependencies = [
-  #"MetaTrader5==5.0.45",
+  "MetaTrader5==5.0.45",
   "SQLAlchemy==2.0.21",
   "beartype==0.16.2",
   "fastapi[all]==0.103.2",

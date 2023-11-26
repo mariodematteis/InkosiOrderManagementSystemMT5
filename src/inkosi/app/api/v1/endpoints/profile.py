@@ -3,7 +3,7 @@ import string
 from dataclasses import asdict
 from hashlib import sha256
 
-from fastapi import APIRouter, Request, Response, status
+from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 
 from inkosi.database.postgresql.database import PostgreSQLCrud
@@ -29,19 +29,17 @@ logger = Logger(
 @router.get(
     path="/login",
     summary="",
-    response_class=JSONResponse,
+    response_model=JSONResponse,
 )
 async def login(
     credentials: LoginCredentials,
     request: Request,
-):
+) -> JSONResponse:
     postgresql = PostgreSQLCrud()
     records = postgresql.get_users(
         email_address=credentials.email_address,
         password=credentials.password,
     )
-
-    print(records)
 
     match len(records):
         case 0:
@@ -153,11 +151,11 @@ async def login(
 @router.post(
     path="/fund",
     summary="",
-    response_class=JSONResponse,
+    response_model=JSONResponse,
 )
 async def raise_fund(
     raise_new_fund: RaiseNewFund,
-):
+) -> JSONResponse:
     postgresql = PostgreSQLCrud()
 
     fund = Funds(**asdict(raise_new_fund))
@@ -189,12 +187,12 @@ async def raise_fund(
 @router.get(
     path="/fund",
     summary="",
-    response_class=JSONResponse,
+    response_model=JSONResponse,
 )
 async def fund_information(
     fund_name: str,
     request: Request,
-) -> Response:
+) -> JSONResponse:
     # Check for policies through the Token given
 
     postgresql = PostgreSQLCrud()

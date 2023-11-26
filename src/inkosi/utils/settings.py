@@ -110,8 +110,6 @@ def get_settings() -> Settings:
         ),
     )
 
-    print(settings_import)
-
     return OmegaConf.structured(
         Settings(**settings_import),
     )

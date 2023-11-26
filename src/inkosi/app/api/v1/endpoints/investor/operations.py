@@ -19,7 +19,7 @@ router = APIRouter()
 )
 async def returns(
     return_request: ReturnRequest,
-):
+) -> Returns:
     postgres = PostgreSQLCrud()
     fund_information: FundInformation = postgres.get_fund_information(
         return_request.fund_name
@@ -39,4 +39,4 @@ async def returns(
         raw_returns[_date] = raw_returns.get(_date - timedelta(days=1), initial_capital)
         respective_records = result.get(_date, [])
         for record in respective_records:
-            raw_returns[_date] += record.get("return")
+            raw_returns[_date] += record.get("returns")

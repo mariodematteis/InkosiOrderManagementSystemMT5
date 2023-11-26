@@ -57,8 +57,6 @@ def generate_id(length: int) -> str:
 state = get_authentication()
 
 if state:
-    # st.set_page_config(page_title="Inkosi")
-
     if "generate_id" not in st.session_state:
         st.session_state["generate_id"] = generate_id(12)
 
