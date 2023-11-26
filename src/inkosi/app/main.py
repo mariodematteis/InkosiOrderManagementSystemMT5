@@ -1,3 +1,5 @@
+from hashlib import sha256
+
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -5,9 +7,11 @@ from inkosi import __project_name__, __version__
 from inkosi.app import _constants
 from inkosi.app.api.v1._routes import v1_router
 from inkosi.database.mongodb.database import MongoDBInstance
-from inkosi.database.postgresql.models import get_instance
+from inkosi.database.postgresql.database import PostgreSQLInstance
+from inkosi.database.postgresql.models import Administrator, Investor, get_instance
 from inkosi.log.log import Logger
 from inkosi.portfolio.risk_management import RiskManagement
+from inkosi.utils.settings import get_default_administrators, get_default_investors
 
 _API_HEALTHCHECK = "OK"
 _API_DESCRIPTION = "Inkosi API"
@@ -45,6 +49,41 @@ async def startup_event() -> None:
     get_instance().connect()
 
     RiskManagement()
+
+    postgres_instance = PostgreSQLInstance()
+
+    for investor in get_default_investors():
+        postgres_instance.add(
+            model=[
+                Investor(
+                    first_name=investor.first_name,
+                    second_name=investor.second_name,
+                    email_address=investor.email_address,
+                    birthday=investor.birthday,
+                    fiscal_code=investor.fiscal_code,
+                    password=sha256(investor.password.encode()).hexdigest(),
+                    policies=investor.policies,
+                    active=investor.active,
+                )
+            ]
+        )
+
+    for administrator_id, administrator in get_default_administrators().items():
+        postgres_instance.add(
+            model=[
+                Administrator(
+                    id=administrator_id,
+                    first_name=administrator.first_name,
+                    second_name=administrator.second_name,
+                    email_address=administrator.email_address,
+                    birthday=administrator.birthday,
+                    fiscal_code=administrator.fiscal_code,
+                    password=sha256(administrator.password.encode()).hexdigest(),
+                    policies=administrator.policies,
+                    active=administrator.active,
+                )
+            ]
+        )
 
 
 @app.on_event(

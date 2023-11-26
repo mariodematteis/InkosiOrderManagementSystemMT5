@@ -58,7 +58,7 @@ async def create_administrator(
 
     postgres = PostgreSQLCrud()
     return postgres.get_administrator_by_email_address(
-        email_address=administrator.email_address
+        email_address=administrator_request.email_address
     )
 
 
@@ -86,7 +86,9 @@ async def create_investor(
     postgres_instance.add(model=[investor])
 
     postgres = PostgreSQLCrud()
-    return postgres.get_investor_by_email_address(email_address=investor.email_address)
+    return postgres.get_investor_by_email_address(
+        email_address=investor_request.email_address
+    )
 
 
 @router.get(
@@ -116,6 +118,20 @@ async def list_portfolio_managers(
 
     if status is None:
         return postgresql.get_portfolio_managers()
+
+
+@router.get(
+    path="/list_fund_managers",
+    summary="",
+    response_model=list[AdministratorProfile],
+)
+async def list_fund_managers(
+    status: bool | None = None,
+):
+    postgresql = PostgreSQLCrud()
+
+    if status is None:
+        return postgresql.get_fund_managers()
 
 
 @router.get(
@@ -253,6 +269,32 @@ async def update_commission(
         return JSONResponse(
             content={
                 "detail": "Unable to update the commission information",
+            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@router.post(
+    path="/conclude_fund_raising",
+    summary="",
+)
+async def conclude_fund_raising(fund_name: str) -> JSONResponse:
+    postgres = PostgreSQLCrud()
+    result = postgres.conclude_fund_raising(
+        fund_name=fund_name,
+    )
+
+    if result:
+        return JSONResponse(
+            content={
+                "detail": "Fund raising correctly concluded",
+            },
+            status_code=status.HTTP_200_OK,
+        )
+    else:
+        return JSONResponse(
+            content={
+                "detail": "Unable to conclude the fund raising",
             },
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )

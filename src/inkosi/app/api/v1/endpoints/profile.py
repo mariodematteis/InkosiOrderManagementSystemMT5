@@ -2,6 +2,7 @@ import random
 import string
 from dataclasses import asdict
 from hashlib import sha256
+from typing import Any
 
 from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
@@ -29,7 +30,6 @@ logger = Logger(
 @router.get(
     path="/login",
     summary="",
-    response_model=JSONResponse,
 )
 async def login(
     credentials: LoginCredentials,
@@ -99,6 +99,7 @@ async def login(
                 content={
                     "detail": "Successfully logged in",
                     "role": records[0].role,
+                    "policies": records[0].policies,
                     "token": token_id,
                 },
                 status_code=status.HTTP_200_OK,
@@ -151,7 +152,6 @@ async def login(
 @router.post(
     path="/fund",
     summary="",
-    response_model=JSONResponse,
 )
 async def raise_fund(
     raise_new_fund: RaiseNewFund,
@@ -167,19 +167,22 @@ async def raise_fund(
                 raise_new_fund,
             )
         )
+
         return JSONResponse(
             content={
                 "detail": (
                     "New Fund correctly raised. Corresponding record added to the"
                     " database."
                 ),
-                "administrator_email_received": result.administrator_received,
-                "administrator_email_not_received": result.administrator_not_received,
+                # "administrator_email_received": result.administrator_received,
+                # "administrator_email_not_received": result.administrator_not_received,
             }
         )
     else:
         return JSONResponse(
-            content=f"Uanble to create the new fund: {raise_new_fund.fund_name}",
+            content={
+                "detail": f"Unable to create the new fund: {raise_new_fund.fund_name}"
+            },
             status_code=status.HTTP_200_OK,
         )
 
@@ -187,11 +190,9 @@ async def raise_fund(
 @router.get(
     path="/fund",
     summary="",
-    response_model=JSONResponse,
 )
 async def fund_information(
     fund_name: str,
-    request: Request,
 ) -> JSONResponse:
     # Check for policies through the Token given
 
@@ -209,10 +210,13 @@ async def fund_information(
                 status_code=status.HTTP_404_NOT_FOUND,
             )
         case 1:
+            record: dict[str, Any] = asdict(records[0])
+            record["created_at"] = record.get("created_at").isoformat()
+
             return JSONResponse(
                 content={
                     "detail": "Fund information correctly fetched",
-                    "result": asdict(records[0]),
+                    "result": record,
                 },
                 status_code=status.HTTP_200_OK,
             )

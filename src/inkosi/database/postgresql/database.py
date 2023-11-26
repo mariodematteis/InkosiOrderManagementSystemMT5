@@ -3,12 +3,15 @@ from hashlib import sha256
 
 from beartype import beartype
 from beartype.typing import Any, Iterable
+from psycopg2.errors import UniqueViolation
 from sqlalchemy import Engine, MetaData, TextClause, create_engine, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import CreateSchema
 from sqlalchemy_utils import create_database, database_exists
 
+from inkosi.app.schemas import Mode
 from inkosi.log.log import Logger
 from inkosi.utils.exceptions import PostgreSQLConnectionError
 from inkosi.utils.settings import (
@@ -19,6 +22,7 @@ from inkosi.utils.settings import (
     get_postgresql_url,
     get_time_activity,
 )
+from inkosi.utils.utils import AdministratorPolicies
 
 from .schemas import (
     AdministratorProfile,
@@ -26,6 +30,7 @@ from .schemas import (
     Commission,
     Fund,
     FundInformation,
+    InvestorProfile,
     PoliciesUpdate,
     Tables,
     User,
@@ -109,14 +114,24 @@ class PostgreSQLInstance(metaclass=DatabaseInstanceSingleton):
                     session.add(model)
 
                 session.commit()
-                session.close()
-            except Exception as error:
+            except IntegrityError as error:
+                if isinstance(error.orig, UniqueViolation):
+                    logger.warn("Another record has been found")
+                    return False
                 logger.error(
                     "Unable to add the specified records to the database. Error"
                     f" occurred: {error}"
                 )
                 return False
+            except Exception as error:
+                logger.error(
+                    "Unable to add the specified records to the database. Error"
+                    f" occurred: {error}"
+                )
+
+                return False
             else:
+                session.close()
                 return True
 
     @beartype
@@ -131,6 +146,7 @@ class PostgreSQLInstance(metaclass=DatabaseInstanceSingleton):
             )
             result = __query.all()
             session.close()
+
             return result
 
     @beartype
@@ -165,7 +181,7 @@ class PostgreSQLCrud:
         __query = (
             f"SET search_path TO {get_postgresql_schema()}; SELECT id, created_at,"
             " validity, user_id, ip_address FROM authentication WHERE id ="
-            f" '{token_id}' AND mode = 'webapp';"
+            f" '{token_id}' AND mode = '{Mode.WEBAPP}';"
         )
 
         if get_ip_address_correspondence():
@@ -206,7 +222,7 @@ class PostgreSQLCrud:
         __query = (
             f"SET search_path TO {get_postgresql_schema()}; SELECT id, created_at,"
             " validity, user_id, ip_address FROM authentication WHERE id ="
-            f" '{token_id}' AND mode = 'backtest';"
+            f" '{token_id}' AND mode = '{Mode.BACKTEST}';"
         )
 
         if get_ip_address_correspondence():
@@ -247,12 +263,12 @@ class PostgreSQLCrud:
         __query = (
             f"SET search_path TO {get_postgresql_schema()}; SELECT id,"
             " CONCAT(first_name, ' ', second_name) AS full_name, first_name,"
-            f" second_name, email_address, '{UserRole.ADMINISTRATOR}' AS role FROM"
-            f" administrators WHERE CAST(id AS TEXT) = '{email_address}' AND"
+            f" second_name, email_address, '{UserRole.ADMINISTRATOR}' AS role, policies"
+            f" FROM administrators WHERE CAST(id AS TEXT) = '{email_address}' AND"
             f" password = '{sha256(password.encode()).hexdigest()}' UNION ALL SELECT"
             " id, CONCAT(first_name, ' ', second_name) AS full_name, first_name,"
-            f" second_name, email_address, '{UserRole.INVESTOR}' AS role"
-            f" FROM investors WHERE email_address = '{email_address}' AND password ="
+            f" second_name, email_address, '{UserRole.INVESTOR}' AS role, policies FROM"
+            f" investors WHERE email_address = '{email_address}' AND password ="
             f" '{sha256(password.encode()).hexdigest()}';"
         )
 
@@ -289,7 +305,7 @@ class PostgreSQLCrud:
         )
 
         return [
-            AdministratorProfile(**row._asdict())
+            InvestorProfile(**row._asdict())
             for row in self.postgresql_instance.select(query=__query)
         ]
 
@@ -300,8 +316,8 @@ class PostgreSQLCrud:
             f"SET search_path TO {get_postgresql_schema()}; SELECT id,"
             " CONCAT(first_name, ' ', second_name) AS full_name, first_name,"
             f" second_name, email_address, policies, '{UserRole.ADMINISTRATOR}' AS role"
-            " FROM administrators WHERE 'portfolio_manager_full_access' ="
-            " ANY(policies);"
+            " FROM administrators WHERE"
+            f" '{AdministratorPolicies.ADMINISTRATOR_PM_FULL_ACCESS}' = ANY(policies);"
         )
 
         return [
@@ -314,8 +330,9 @@ class PostgreSQLCrud:
     ) -> list[Fund]:
         __query = (
             f"SET search_path TO {get_postgresql_schema()}; SELECT id, fund_name,"
-            " investment_firm, administrator, investors, capital_distribution,"
-            " commission_type, commission_value FROM funds"
+            " investment_firm, created_at, administrators, investors,"
+            " capital_distribution, commission_type, commission_value, risk_limits"
+            " FROM funds"
         )
 
         return [
@@ -366,17 +383,21 @@ class PostgreSQLCrud:
         self.postgresql_instance.update(query=__query)
         return True
 
-    def get_fund_information(self, fund_name: str | None) -> FundInformation:
+    def get_fund_information(
+        self,
+        fund_name: str | None,
+    ) -> list[FundInformation]:
         where_clause = f"WHERE fund_name = '{fund_name}';"
 
         if fund_name is None:
             where_clause = ";"
 
         __query = (
-            f"SET search_path TO {get_postgresql_schema()}; SELECT id, investment_firm,"
-            " fund_name, created_at, administrator, investors, capital_distribution,"
-            " commission_type, commission_value, array['Sample1', 'Sample2']::text AS"
-            f" strategies FROM funds {where_clause}"
+            f"SET search_path TO {get_postgresql_schema()}; SELECT id, fund_name,"
+            " created_at, investment_firm, administrators, investors,"
+            " capital_distribution, commission_type, commission_value,"
+            " array['Sample1', 'Sample2'] AS strategies, raising_funds FROM funds"
+            f" {where_clause}"
         )
 
         return [
@@ -473,6 +494,35 @@ class PostgreSQLCrud:
             f" commission_type = '{commission.commission_type}', commission_value ="
             f" {commission.commission_value} WHERE fund_name = '{commission.fund}'"
             f" OR id = {commission.fund};"
+        )
+
+        return self.postgresql_instance.update(query=__query)
+
+    def get_fund_managers(
+        self,
+    ) -> list[User]:
+        __query = (
+            f"SET search_path TO {get_postgresql_schema()}; SELECT id,"
+            " CONCAT(first_name, ' ', second_name) AS full_name, first_name,"
+            f" second_name, email_address, policies, '{UserRole.ADMINISTRATOR}' AS role"
+            " FROM administrators WHERE"
+            f" '{AdministratorPolicies.ADMINISTRATOR_FM_FULL_ACCESS}' = ANY(policies)"
+            f" OR '{AdministratorPolicies.ADMINISTRATOR_IFM_FULL_ACCESS}' ="
+            " ANY(policies);"
+        )
+
+        return [
+            AdministratorProfile(**row._asdict())
+            for row in self.postgresql_instance.select(query=__query)
+        ]
+
+    def conclude_fund_raising(
+        self,
+        fund_name: str,
+    ) -> FundInformation:
+        __query = (
+            f"SET search_path TO {get_postgresql_schema()}; UPDATE "
+            f"funds SET raising_funds = False WHERE fund_name = '{fund_name}';"
         )
 
         return self.postgresql_instance.update(query=__query)

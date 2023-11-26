@@ -21,7 +21,7 @@ class Administrator(get_instance().base):
         primary_key=True,
         index=True,
         autoincrement=True,
-        default=random.randint(10000000, 49999999),
+        default=lambda _: random.randint(10000000, 49999999),
     )
     first_name: str = Column(String, nullable=False)
     second_name: str = Column(String, nullable=False)
@@ -40,12 +40,12 @@ class Investor(get_instance().base):
         Integer,
         primary_key=True,
         index=True,
-        default=random.randint(50000000, 99999999),
+        default=lambda _: random.randint(50000000, 99999999),
     )
     first_name: str = Column(String, nullable=False)
     second_name: str = Column(String, nullable=False)
     email_address: str = Column(String, unique=True, nullable=False)
-    birthday: date = Column(Date, nullable=False)
+    birthday: date = Column(Date, nullable=True)
     fiscal_code: str = Column(String, nullable=True)
     password: str = Column(String, nullable=False)
     policies: list = Column(ARRAY(String), default=[])
@@ -59,7 +59,7 @@ class Funds(get_instance().base):
         Integer,
         primary_key=True,
         index=True,
-        default=random.randint(10000000, 99999999),
+        default=lambda _: random.randint(10000000, 99999999),
     )
     fund_name: str = Column(String, nullable=False, unique=True)
     investment_firm: str = Column(String, nullable=True)

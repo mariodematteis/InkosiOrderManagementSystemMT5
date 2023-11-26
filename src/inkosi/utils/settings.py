@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
@@ -93,10 +93,12 @@ class Settings:
     RiskManagement: RiskManagement
     TechnicalIndicators: TechnicalIndicators
 
-    DefaultAdminstrator: dict[int, str | date | list]
-    DefaultInvestors: list[dict[int, str | date | list]]
-
-    DockerInstance: bool
+    DefaultAdministrators: dict[int, dict[str, str | date | list | None]] = field(
+        default_factory=dict
+    )
+    DefaultInvestors: list[dict[str, str | date | list | None]] = field(
+        default_factory=list
+    )
 
 
 @lru_cache
@@ -212,10 +214,10 @@ def get_technical_indicators_values() -> TechnicalIndicators:
 
 
 @lru_cache
-def get_default_administrators() -> dict[int, str | date | list] | None:
-    return get_settings().DefaultAdminstrator
+def get_default_administrators() -> dict[int, dict[str, str | date | list | None]]:
+    return get_settings().DefaultAdministrators
 
 
 @lru_cache
-def get_default_investors() -> list[dict[int, str | date | list]] | None:
+def get_default_investors() -> list[dict[str, str | date | list | None]]:
     return get_settings().DefaultInvestors
