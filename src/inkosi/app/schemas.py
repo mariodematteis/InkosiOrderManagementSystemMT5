@@ -43,5 +43,14 @@ class InvestorRequest:
 
 
 @dataclass
+class StrategyRequest:
+    id: str
+    administrator_id: int
+    fund_name: str | None
+    category: str
+    name: str | None = None
+
+
+@dataclass
 class Returns:
     balance: str

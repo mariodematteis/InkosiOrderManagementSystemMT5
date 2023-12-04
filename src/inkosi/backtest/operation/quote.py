@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any
 
 import numpy as np
@@ -20,20 +21,35 @@ class Quote(metaclass=QuoteMetaclass):
     def __init__(
         self,
         period="1y",
-        timeframe="1d",
+        time_frame="1d",
     ):
         self.period = period
-        self.time_frame = timeframe
+        self.time_frame = time_frame
 
         self.logger = Logger("Quote", package_name="backtest.operation")
 
         self.financial_instruments = {}
 
-    def download_quote(self, ticker: str) -> dict[str, list] | None:
+    def download_quote(
+        self,
+        ticker: str,
+        start: date | None = None,
+        end: date | None = None,
+    ) -> dict[str, list] | None:
         quote = yf.Ticker(ticker)
 
         try:
-            h_prices = quote.history(period=self.period, interval=self.time_frame)
+            if start and end:
+                h_prices = quote.history(
+                    start=start,
+                    end=end,
+                    interval=self.time_frame,
+                )
+            else:
+                h_prices = quote.history(
+                    period=self.period,
+                    interval=self.time_frame,
+                )
         except Exception:
             self.logger.error("Unable to find the specififed ticker")
             return
@@ -47,19 +63,13 @@ class Quote(metaclass=QuoteMetaclass):
         returns = np.array(close_prices) - np.array(open_prices)
 
         return {
-            "DATES": dates,
-            "OPEN": open_prices,
-            "HIGH": high_prices,
-            "LOW": low_prices,
-            "CLOSE": close_prices,
-            "RETURNS": list(returns),
+            "Dates": dates,
+            "Open": open_prices,
+            "High": high_prices,
+            "Low": low_prices,
+            "Close": close_prices,
+            "Returns": list(returns),
         }
-
-    def details(
-        self,
-        ticker: str,
-    ) -> dict[str | list] | None:
-        return self.financial_instruments.get(ticker)
 
     def __repr__(self) -> str:
         return str(self.financial_instruments)

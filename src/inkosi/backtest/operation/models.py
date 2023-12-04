@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any
 
-from inkosi.backtest.operation.sources import Dataset
 from inkosi.database.mongodb.schemas import Position
 from inkosi.utils.utils import EnhancedStrEnum
 
-TICKS_DATETIME_INDEX = 0
-TICKS_BID_INDEX = 1
-TICKS_ASK_INDEX = 2
+TICKS_DATETIME_INDEX: int = 0
+TICKS_BID_INDEX: int = 1
+TICKS_ASK_INDEX: int = 2
 
 
 class SourceType(EnhancedStrEnum):
@@ -15,6 +15,7 @@ class SourceType(EnhancedStrEnum):
     CSV: str = "csv"
     HDF: str = "hdf"
     PARQUET: str = "parquet"
+    ASSET: str = "asset"
 
 
 class TradeResult(EnhancedStrEnum):
@@ -49,4 +50,4 @@ class BacktestRequest:
     direction: list[Position]
     take_profits: list[float]
     stop_losses: list[float]
-    dataset: Dataset
+    dataset: Any

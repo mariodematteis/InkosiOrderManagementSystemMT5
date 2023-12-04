@@ -16,7 +16,7 @@ class Position(EnhancedStrEnum):
 
 @dataclass
 class TradeRequest:
-    fund: int | None = None
+    fund: str | None = None
     portfolio_manager: int | None = None
     ats: str | None = None
     investors: dict | None = None
@@ -45,5 +45,5 @@ class CloseTradeRequest:
 @dataclass
 class ReturnRequest:
     fund_name: str
-    date_from: date
-    date_to: date
+    date_from: date | str
+    date_to: date | str

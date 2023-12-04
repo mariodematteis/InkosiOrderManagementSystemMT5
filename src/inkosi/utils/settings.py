@@ -85,6 +85,11 @@ class TechnicalIndicators:
 
 
 @dataclass
+class Backtesting:
+    Tickers: list[str]
+
+
+@dataclass
 class Settings:
     PostgreSQL: PostgreSQL
     MongoDB: MongoDB
@@ -92,11 +97,19 @@ class Settings:
     Policies: Policies
     RiskManagement: RiskManagement
     TechnicalIndicators: TechnicalIndicators
+    Backtesting: Backtesting
 
     DefaultAdministrators: dict[int, dict[str, str | date | list | None]] = field(
         default_factory=dict
     )
     DefaultInvestors: list[dict[str, str | date | list | None]] = field(
+        default_factory=list
+    )
+
+    DefaultFunds: dict[int, dict[str, str | date | list | None]] = field(
+        default_factory=dict
+    )
+    DefaultStrategies: list[dict[str, str | date | list | None]] = field(
         default_factory=list
     )
 
@@ -221,3 +234,23 @@ def get_default_administrators() -> dict[int, dict[str, str | date | list | None
 @lru_cache
 def get_default_investors() -> list[dict[str, str | date | list | None]]:
     return get_settings().DefaultInvestors
+
+
+@lru_cache
+def get_default_funds() -> dict[int, dict[str, str | date | list | None]]:
+    return get_settings().DefaultFunds
+
+
+@lru_cache
+def get_default_strategies() -> list[dict[str, str | date | list | None]]:
+    return get_settings().DefaultStrategies
+
+
+@lru_cache
+def get_backtesting_settings() -> Backtesting:
+    return get_settings().Backtesting
+
+
+@lru_cache
+def get_default_tickers() -> list[str]:
+    return get_backtesting_settings().Tickers

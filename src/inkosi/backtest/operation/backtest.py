@@ -1,23 +1,17 @@
 import numpy as np
 import pandas as pd
 import pandas_ta as ta
-import torch
 from numpy.typing import NDArray
 
-from inkosi.database.mongodb.schemas import Position
-from inkosi.log.log import Logger
-from inkosi.utils.settings import get_technical_indicators_values
-
-from .models import (
+from inkosi.backtest.operation.models import (
     TICKS_ASK_INDEX,
     TICKS_BID_INDEX,
-    TICKS_DATETIME_INDEX,
     BacktestRecord,
     BacktestRequest,
     TradeResult,
     TradeStatus,
 )
-from .schemas import (
+from inkosi.backtest.operation.schemas import (
     AvailableRawColumns,
     AvailableTechincalIndicators,
     ComparisonElement,
@@ -25,6 +19,9 @@ from .schemas import (
     Filter,
     Relation,
 )
+from inkosi.database.mongodb.schemas import Position
+from inkosi.log.log import Logger
+from inkosi.utils.settings import get_technical_indicators_values
 
 logger = Logger(
     module_name="backtest",
@@ -36,10 +33,16 @@ logger = Logger(
 def technical_column(
     data_frame: pd.DataFrame,
     column_type: AvailableRawColumns | AvailableTechincalIndicators | None,
-    additional_information: dict,
-) -> NDArray:
+    additional_information: dict = {},
+) -> NDArray | None:
     if AvailableRawColumns.has(column_type):
         return data_frame[column_type]
+
+    print(
+        additional_information.get(
+            Elements.PERIOD,
+        )
+    )
 
     match column_type:
         case AvailableTechincalIndicators.SMA:
@@ -51,7 +54,7 @@ def technical_column(
                 ),
             ).to_numpy()
         case AvailableTechincalIndicators.WMA:
-            return data_frame.ta.sma(
+            return data_frame.ta.wma(
                 close=data_frame[Elements.CLOSE_PRICE],
                 length=additional_information.get(
                     Elements.PERIOD,
@@ -59,13 +62,15 @@ def technical_column(
                 ),
             ).to_numpy()
         case AvailableTechincalIndicators.EMA:
-            return data_frame.ta.sma(
+            return data_frame.ta.ema(
                 close=data_frame[Elements.CLOSE_PRICE],
-                length=additional_information(
+                length=additional_information.get(
                     Elements.PERIOD,
                     get_technical_indicators_values().MovingAveragePeriod,
                 ),
             ).to_numpy()
+        case _:
+            return data_frame[column_type]
 
 
 def filter_dataset(
@@ -81,17 +86,18 @@ def filter_dataset(
 
         first_column: NDArray = technical_column(
             data_frame=data_frame,
-            technical_indicator=first_element.get(Elements.ELEMENT),
+            column_type=first_element.get(Elements.ELEMENT),
+            additional_information=first_element,
         )
 
         second_column: NDArray = technical_column(
             data_frame,
-            technical_indicator=second_element.get(Elements.ELEMENT),
+            column_type=second_element.get(Elements.ELEMENT),
+            additional_information=second_element,
         )
 
-        if not first_element or not second_column:
-            logger.critical("Unable to correctly identify the comparison")
-            continue
+        print(first_column)
+        print(second_column)
 
         match relation:
             case Relation.GREATER:
@@ -104,10 +110,12 @@ def filter_dataset(
                 _indexes = np.nonzero(first_column <= second_column)
             case Relation.EQUAL:
                 _indexes = np.nonzero(first_column == second_column)
+            case _:
+                return np.array([])
 
-        indexes_list.intersection_update(_indexes)
+        indexes_list.intersection_update(_indexes[0])
 
-    return np.array(indexes_list)
+    return np.array(list(indexes_list))
 
 
 def checker(
@@ -128,32 +136,29 @@ def checker(
 
     while current_index < last_index:
         if direction == Position.BUY:
-            result = np.argmax(
-                (
-                    dataset[current_index : current_index + delta]
-                    >= entry_point + take_profit
-                )
-            )
+            tmp_dataset = dataset[
+                current_index : current_index + delta, TICKS_BID_INDEX
+            ]
+            result = np.argmax((tmp_dataset >= entry_point + take_profit))
 
         elif direction == Position.SELL:
-            result = np.argmax(
-                (
-                    dataset[current_index : current_index + delta]
-                    <= entry_point - abs(stop_loss)
-                )
-            )
+            tmp_dataset = dataset[
+                current_index : current_index + delta, TICKS_ASK_INDEX
+            ]
+            result = np.argmax((tmp_dataset <= entry_point - abs(stop_loss)))
 
         if not result:
             current_index += delta
+        else:
+            return current_index + result
 
-        if result:
-            return result
 
-
-@torch.compile
 def backtest(request: BacktestRequest) -> list[BacktestRecord] | None:
     result: list[BacktestRecord] = []
-    dataset: NDArray = request.dataset.get_dataset()
+    dataset: NDArray | None = request.dataset.get_dataset()
+    if dataset is None:
+        return None
+
     n_dataset: int = dataset.shape[0]
 
     if len(request.direction) != len(request.starting_indexes):
@@ -169,16 +174,19 @@ def backtest(request: BacktestRequest) -> list[BacktestRecord] | None:
         request.take_profits,
         request.stop_losses,
     ):
-        if occurence + 1 > n_dataset:
+        if occurence + 1 > n_dataset - 1:
             logger.critical("Backtest Interrupted... Dataset records exhausted")
             break
 
         entry_point_index: int = occurence + 1
 
-        if direction == Position.BUY:
-            entry_point_price: float = dataset[entry_point_index, TICKS_BID_INDEX]
-        if direction == Position.SELL:
-            entry_point_price: float = dataset[entry_point_index, TICKS_ASK_INDEX]
+        match direction:
+            case Position.BUY:
+                entry_point_price: float = dataset[entry_point_index, TICKS_BID_INDEX]
+            case Position.SELL:
+                entry_point_price: float = dataset[entry_point_index, TICKS_ASK_INDEX]
+            case _:
+                continue
 
         result_up = checker(
             dataset,
@@ -197,84 +205,44 @@ def backtest(request: BacktestRequest) -> list[BacktestRecord] | None:
             stop_loss,
         )
 
+        print(entry_point_index, entry_point_price, result_up, result_down)
+
+        if result_up is None or result_down is None:
+            continue
+
         if direction == Position.BUY:
             if result_down == 0:
                 trade_result = TradeResult.PROFIT
                 trade_status = TradeStatus.CLOSED
-
-                last = (
-                    dataset[entry_point_index + result_up, TICKS_DATETIME_INDEX]
-                    - dataset[entry_point_index + result_up, TICKS_DATETIME_INDEX]
-                )
             elif result_up == 0:
                 trade_result = TradeResult.LOSS
                 trade_status = TradeStatus.CLOSED
-
-                last = (
-                    dataset[entry_point_index + result_down, TICKS_DATETIME_INDEX]
-                    - dataset[entry_point_index + result_down, TICKS_DATETIME_INDEX]
-                )
             else:
                 trade_result = TradeResult.PENDING
                 trade_status = TradeStatus.PENDING
 
-                last = "NA"
-
             if result_up < result_down:
                 trade_result = TradeResult.PROFIT
                 trade_status = TradeStatus.CLOSED
-
-                last = (
-                    dataset[entry_point_index + result_up, TICKS_DATETIME_INDEX]
-                    - dataset[entry_point_index + result_up, TICKS_DATETIME_INDEX]
-                )
             else:
                 trade_result = TradeResult.LOSS
                 trade_status = TradeStatus.CLOSED
-
-                last = (
-                    dataset[entry_point_index + result_down, TICKS_DATETIME_INDEX]
-                    - dataset[entry_point_index + result_down, TICKS_DATETIME_INDEX]
-                )
         elif direction == Position.SELL:
             if result_down == 0:
                 trade_result = TradeResult.LOSS
                 trade_status = TradeStatus.CLOSED
-
-                last = (
-                    dataset[entry_point_index + result_up, TICKS_DATETIME_INDEX]
-                    - dataset[entry_point_index + result_up, TICKS_DATETIME_INDEX]
-                )
             elif result_up == 0:
                 trade_result = TradeResult.PROFIT
                 trade_status = TradeStatus.CLOSED
-
-                last = (
-                    dataset[entry_point_index + result_down, TICKS_DATETIME_INDEX]
-                    - dataset[entry_point_index + result_down, TICKS_DATETIME_INDEX]
-                )
-
             else:
                 trade_result = TradeResult.PENDING
                 trade_status = TradeStatus.PENDING
-                last = "NA"
-
             if result_up < result_down:
                 trade_result = TradeResult.LOSS
                 trade_status = TradeStatus.CLOSED
-
-                last = (
-                    dataset[entry_point_index + result_up, TICKS_DATETIME_INDEX]
-                    - dataset[entry_point_index + result_up, TICKS_DATETIME_INDEX]
-                )
             else:
                 trade_result = TradeResult.PROFIT
                 trade_status = TradeStatus.CLOSED
-
-                last = (
-                    dataset[entry_point_index + result_down, TICKS_DATETIME_INDEX]
-                    - dataset[entry_point_index + result_down, TICKS_DATETIME_INDEX]
-                )
         else:
             logger.critical(
                 f"Unable to identify the specified 'Direction' parameter: {direction}"

@@ -1,15 +1,16 @@
+from datetime import datetime
 from hashlib import sha256
 
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
-from inkosi.app.schemas import AdministratorRequest, InvestorRequest
+from inkosi.app.schemas import AdministratorRequest, InvestorRequest, StrategyRequest
 from inkosi.database.postgresql.database import PostgreSQLCrud, PostgreSQLInstance
-from inkosi.database.postgresql.models import Administrator, Investor
+from inkosi.database.postgresql.models import Administrators, Investors, Strategies
 from inkosi.database.postgresql.schemas import (
     AddAdministratorToFund,
-    AddInvestorToFund,
     AdministratorProfile,
+    ATSProfile,
     Commission,
     Fund,
     InvestorProfile,
@@ -43,7 +44,7 @@ async def create_administrator(
 ):
     postgres_instance = PostgreSQLInstance()
 
-    administrator = Administrator(
+    administrator = Administrators(
         first_name=administrator_request.first_name,
         second_name=administrator_request.second_name,
         email_address=administrator_request.email_address,
@@ -72,7 +73,7 @@ async def create_investor(
 ):
     postgres_instance = PostgreSQLInstance()
 
-    investor = Investor(
+    investor = Investors(
         first_name=investor_request.first_name,
         second_name=investor_request.second_name,
         email_address=investor_request.email_address,
@@ -89,6 +90,33 @@ async def create_investor(
     return postgres.get_investor_by_email_address(
         email_address=investor_request.email_address
     )
+
+
+@router.post(
+    path="/create_ats",
+    summary="",
+    response_model=list[ATSProfile],
+)
+async def create_ats(
+    strategy_request: StrategyRequest,
+):
+    postgres_instance = PostgreSQLInstance()
+
+    investor = Strategies(
+        id=strategy_request.id,
+        name=None if not strategy_request.name else strategy_request.name,
+        created_at=datetime.now(),
+        administrator_id=strategy_request.administrator_id,
+        fund_names=[]
+        if not strategy_request.fund_name
+        else [strategy_request.fund_name],
+        category=strategy_request.category,
+    )
+
+    postgres_instance.add(model=[investor])
+
+    postgres = PostgreSQLCrud()
+    return postgres.get_ats_by_id(ats_id=strategy_request.id)
 
 
 @router.get(
@@ -123,15 +151,16 @@ async def list_portfolio_managers(
 @router.get(
     path="/list_fund_managers",
     summary="",
-    response_model=list[AdministratorProfile],
+    response_model=list | dict,
 )
 async def list_fund_managers(
     status: bool | None = None,
+    fund_name: str | None = None,
 ):
     postgresql = PostgreSQLCrud()
 
     if status is None:
-        return postgresql.get_fund_managers()
+        return postgresql.get_fund_managers(fund_name=fund_name)
 
 
 @router.get(
@@ -191,35 +220,6 @@ async def update_policies(
 
 
 @router.post(
-    path="/add_investor",
-    summary="",
-)
-async def add_investor(
-    add_investor_to_fund: AddInvestorToFund,
-) -> JSONResponse:
-    postgres = PostgreSQLCrud()
-    result = postgres.add_investor_to_fund(
-        add_investor_to_fund.investor_id,
-        add_investor_to_fund.fund,
-    )
-
-    if result:
-        return JSONResponse(
-            content={
-                "detail": "Investor correctly added to the fund",
-            },
-            status_code=status.HTTP_200_OK,
-        )
-    else:
-        return JSONResponse(
-            content={
-                "detail": "Unable to add the investor to the fund",
-            },
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
-
-
-@router.post(
     path="/add_administrator",
     summary="",
 )
@@ -227,6 +227,7 @@ async def add_administrator(
     add_administrator_to_fund: AddAdministratorToFund,
 ) -> JSONResponse:
     postgres = PostgreSQLCrud()
+
     result = postgres.add_administrator_to_fund(
         add_administrator_to_fund.administrator_id,
         add_administrator_to_fund.fund,

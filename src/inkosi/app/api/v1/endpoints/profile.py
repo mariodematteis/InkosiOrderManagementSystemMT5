@@ -101,6 +101,7 @@ async def login(
                     "role": records[0].role,
                     "policies": records[0].policies,
                     "token": token_id,
+                    "id": records[0].id,
                 },
                 status_code=status.HTTP_200_OK,
             )
@@ -174,8 +175,6 @@ async def raise_fund(
                     "New Fund correctly raised. Corresponding record added to the"
                     " database."
                 ),
-                # "administrator_email_received": result.administrator_received,
-                # "administrator_email_not_received": result.administrator_not_received,
             }
         )
     else:

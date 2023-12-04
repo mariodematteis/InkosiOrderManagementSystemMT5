@@ -1,3 +1,4 @@
+from datetime import datetime
 from hashlib import sha256
 
 from fastapi import FastAPI, status
@@ -8,10 +9,22 @@ from inkosi.app import _constants
 from inkosi.app.api.v1._routes import v1_router
 from inkosi.database.mongodb.database import MongoDBInstance
 from inkosi.database.postgresql.database import PostgreSQLInstance
-from inkosi.database.postgresql.models import Administrator, Investor, get_instance
+from inkosi.database.postgresql.models import (
+    Administrators,
+    Funds,
+    Investors,
+    Strategies,
+    get_instance,
+)
 from inkosi.log.log import Logger
 from inkosi.portfolio.risk_management import RiskManagement
-from inkosi.utils.settings import get_default_administrators, get_default_investors
+from inkosi.utils.settings import (
+    get_default_administrators,
+    get_default_funds,
+    get_default_investors,
+    get_default_strategies,
+)
+from inkosi.utils.utils import CommissionTypes
 
 _API_HEALTHCHECK = "OK"
 _API_DESCRIPTION = "Inkosi API"
@@ -55,7 +68,7 @@ async def startup_event() -> None:
     for investor in get_default_investors():
         postgres_instance.add(
             model=[
-                Investor(
+                Investors(
                     first_name=investor.first_name,
                     second_name=investor.second_name,
                     email_address=investor.email_address,
@@ -71,7 +84,7 @@ async def startup_event() -> None:
     for administrator_id, administrator in get_default_administrators().items():
         postgres_instance.add(
             model=[
-                Administrator(
+                Administrators(
                     id=administrator_id,
                     first_name=administrator.first_name,
                     second_name=administrator.second_name,
@@ -81,6 +94,64 @@ async def startup_event() -> None:
                     password=sha256(administrator.password.encode()).hexdigest(),
                     policies=administrator.policies,
                     active=administrator.active,
+                )
+            ]
+        )
+
+    for fund_name, fund in get_default_funds().items():
+        postgres_instance.add(
+            model=[
+                Funds(
+                    fund_name=fund_name,
+                    created_at=datetime.today(),
+                    administrators=fund.get(
+                        "administrators",
+                        [],
+                    ),
+                    commission_type=fund.get(
+                        "commission_type",
+                        CommissionTypes.ABSOLUTE_TYPE,
+                    ),
+                    commission_value=fund.get(
+                        "commission_value",
+                        0.0,
+                    ),
+                    risk_limits=fund.get(
+                        "risk_limits",
+                        False,
+                    ),
+                    raising_funds=fund.get(
+                        "raising_funds",
+                        False,
+                    ),
+                )
+            ]
+        )
+
+    for strategy in get_default_strategies():
+        if not strategy.get("id"):
+            logger.critical("No ID has been specified for this default strategy")
+            continue
+
+        postgres_instance.add(
+            model=[
+                Strategies(
+                    id=strategy.get(
+                        "id",
+                    ),
+                    created_at=datetime.now(),
+                    administrator_id=strategy.get(
+                        "administrator_id",
+                        None,
+                    ),
+                    fund_names=strategy.get(
+                        "fund_names",
+                        [],
+                    ),
+                    category=strategy.get(
+                        "category",
+                        None,
+                    ),
                 )
             ]
         )

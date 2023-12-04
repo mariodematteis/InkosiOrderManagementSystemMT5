@@ -263,7 +263,7 @@ class MongoDBCrud:
 
     def get_returns(
         self,
-        fund: int,
+        fund: str,
     ) -> list[dict]:
         trades_collection: Collection = self.mongodb_instance.database[
             get_mongodb_collection().Trade

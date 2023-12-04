@@ -6,7 +6,7 @@ from inkosi.log.log import Logger
 from inkosi.utils.settings import get_risk_management_models
 
 logger = Logger(
-    module_name="risk_management",
+    module_name="RiskManagement",
     package_name="portfolio",
 )
 

@@ -26,6 +26,7 @@ from inkosi.utils.utils import AdministratorPolicies
 
 from .schemas import (
     AdministratorProfile,
+    ATSProfile,
     AuthenticationOutput,
     Commission,
     Fund,
@@ -222,7 +223,7 @@ class PostgreSQLCrud:
         __query = (
             f"SET search_path TO {get_postgresql_schema()}; SELECT id, created_at,"
             " validity, user_id, ip_address FROM authentication WHERE id ="
-            f" '{token_id}' AND mode = '{Mode.BACKTEST}';"
+            f" '{token_id}';"
         )
 
         if get_ip_address_correspondence():
@@ -235,6 +236,8 @@ class PostgreSQLCrud:
             AuthenticationOutput(**row._asdict())
             for row in self.postgresql_instance.select(query=__query)
         ]
+
+        print(result, __query)
 
         match len(result):
             case 1:
@@ -309,6 +312,23 @@ class PostgreSQLCrud:
             for row in self.postgresql_instance.select(query=__query)
         ]
 
+    def get_ats_by_id(
+        self,
+        ats_id: str,
+    ) -> list[ATSProfile]:
+        __query = (
+            f"SET search_path TO {get_postgresql_schema()}; SELECT strategies.id,"
+            " CONCAT(administrators.first_name, ' ', administrators.second_name) AS"
+            " full_name, administrators.id AS administrator_id, fund_names, category"
+            " FROM strategies JOIN administrators ON administrators.id ="
+            f" strategies.administrator_id WHERE strategies.id = '{ats_id}';"
+        )
+
+        return [
+            ATSProfile(**row._asdict())
+            for row in self.postgresql_instance.select(query=__query)
+        ]
+
     def get_portfolio_managers(
         self,
     ) -> list[AdministratorProfile]:
@@ -331,8 +351,8 @@ class PostgreSQLCrud:
         __query = (
             f"SET search_path TO {get_postgresql_schema()}; SELECT id, fund_name,"
             " investment_firm, created_at, administrators, investors,"
-            " capital_distribution, commission_type, commission_value, risk_limits"
-            " FROM funds"
+            " capital_distribution, commission_type, commission_value, risk_limits,"
+            " raising_funds FROM funds"
         )
 
         return [
@@ -393,11 +413,22 @@ class PostgreSQLCrud:
             where_clause = ";"
 
         __query = (
-            f"SET search_path TO {get_postgresql_schema()}; SELECT id, fund_name,"
-            " created_at, investment_firm, administrators, investors,"
-            " capital_distribution, commission_type, commission_value,"
-            " array['Sample1', 'Sample2'] AS strategies, raising_funds FROM funds"
-            f" {where_clause}"
+            f"SET search_path TO {get_postgresql_schema()}; WITH tools(id) AS (SELECT"
+            f" id FROM strategies WHERE '{fund_name}' = ANY(fund_names)),"
+            " administrators_of_fund(id) AS (SELECT unnest(administrators) as id from"
+            f" funds WHERE fund_name='{fund_name}'), investors_of_fund(id) AS (SELECT"
+            f" unnest(investors) as id from funds WHERE fund_name='{fund_name}') SELECT"
+            " DISTINCT funds.id, fund_name, created_at, investment_firm,"
+            " administrators, array(SELECT CONCAT(first_name, ' ', second_name) AS"
+            " title FROM development.administrators JOIN administrators_of_fund ON"
+            " administrators_of_fund.id = administrators.id) AS"
+            " administrators_full_name, investors, array(SELECT CONCAT(first_name, '"
+            " ', second_name) AS title FROM development.investors JOIN"
+            " investors_of_fund ON investors_of_fund.id = investors.id)"
+            " AS investors_full_name, capital_distribution, commission_type,"
+            " commission_value, array(SELECT DISTINCT id FROM development.strategies"
+            f" WHERE '{fund_name}' = ANY(fund_names)) AS strategies, raising_funds FROM"
+            f" funds, administrators_of_fund {where_clause}"
         )
 
         return [
@@ -447,37 +478,46 @@ class PostgreSQLCrud:
                 )
                 return False
 
-    def add_investor_to_fund(
+    def check_for_fundname_existence(
         self,
-        investor_id: int,
-        fund: str | int,
+        fund_name: str,
     ) -> bool:
-        if self.check_for_investor_existence(investor_id=investor_id):
-            __query = (
-                f"SET search_path TO {get_postgresql_schema()}; UPDATE funds SET"
-                " investors = (SELECT array_agg(distinct e) FROM"
-                f" unnest(investors) || array['{str(investor_id)}']::text[]"
-                f" e) WHERE fund_name = '{fund}' OR id = {fund};"
-            )
+        __query = (
+            f"SET search_path TO {get_postgresql_schema()}; SELECT fund_name FROM"
+            f" funds WHERE fund_name = '{fund_name}';"
+        )
 
-            # TODO: Update capital_distribution JSONB
-
-            self.postgresql_instance.update(query=__query)
-            return True
-        else:
-            return False
+        result = self.postgresql_instance.select(query=__query)
+        match len(result):
+            case 0:
+                return False
+            case 1:
+                return True
+            case _:
+                logger.critical("Two or more funds have been found with the same name.")
+                return False
 
     def add_administrator_to_fund(
         self,
-        administrator_id: int,
+        administrator_id: int | None,
         fund: str | int,
     ) -> bool:
+        if administrator_id is None:
+            return False
+
+        if isinstance(fund, int):
+            where_option = f"WHERE id = {fund}"
+        elif isinstance(fund, str):
+            where_option = f"WHERE fund_name = '{fund}'"
+        else:
+            return False
+
         if self.check_for_administrator_existence(administrator_id=administrator_id):
             __query = (
                 f"SET search_path TO {get_postgresql_schema()}; UPDATE funds SET"
-                " administrators = (SELECT array_agg(distinct e) FROM"
-                f" unnest(administrators) || array['{str(administrator_id)}']::text[]"
-                f" e) WHERE fund_name = '{fund}' OR id = {fund};"
+                " administrators = (SELECT array(select distinct"
+                f" unnest(array_append(administrators, {administrator_id})) FROM"
+                f" funds)) {where_option};"
             )
 
             self.postgresql_instance.update(query=__query)
@@ -500,21 +540,42 @@ class PostgreSQLCrud:
 
     def get_fund_managers(
         self,
+        fund_name: str | None = None,
     ) -> list[User]:
-        __query = (
-            f"SET search_path TO {get_postgresql_schema()}; SELECT id,"
-            " CONCAT(first_name, ' ', second_name) AS full_name, first_name,"
-            f" second_name, email_address, policies, '{UserRole.ADMINISTRATOR}' AS role"
-            " FROM administrators WHERE"
-            f" '{AdministratorPolicies.ADMINISTRATOR_FM_FULL_ACCESS}' = ANY(policies)"
-            f" OR '{AdministratorPolicies.ADMINISTRATOR_IFM_FULL_ACCESS}' ="
-            " ANY(policies);"
-        )
+        if not fund_name:
+            __query = (
+                f"SET search_path TO {get_postgresql_schema()}; SELECT id,"
+                " CONCAT(first_name, ' ', second_name) AS full_name, first_name,"
+                f" second_name, email_address, policies, '{UserRole.ADMINISTRATOR}' AS"
+                " role FROM administrators WHERE"
+                f" '{AdministratorPolicies.ADMINISTRATOR_FM_FULL_ACCESS}' ="
+                " ANY(policies) OR"
+                f" '{AdministratorPolicies.ADMINISTRATOR_IFM_FULL_ACCESS}' ="
+                " ANY(policies);"
+            )
 
-        return [
-            AdministratorProfile(**row._asdict())
-            for row in self.postgresql_instance.select(query=__query)
-        ]
+            return [
+                AdministratorProfile(**row._asdict())
+                for row in self.postgresql_instance.select(query=__query)
+            ]
+        else:
+            __query = (
+                f"SET search_path TO {get_postgresql_schema()}; WITH"
+                " all_administrators(id, full_name) AS (SELECT id, CONCAT(first_name,"
+                " ' ', second_name) AS full_name FROM administrators), difference(id,"
+                " full_name) AS (SELECT id, full_name FROM all_administrators WHERE"
+                " all_administrators.id NOT IN (SELECT UNNEST(administrators) AS id"
+                f" FROM funds WHERE fund_name = '{fund_name}')) SELECT full_name, id"
+                " FROM difference;"
+            )
+
+            raw_result = {}
+
+            result = self.postgresql_instance.select(query=__query)
+            for row in result:
+                raw_result[row[0]] = row[1]
+
+            return raw_result
 
     def conclude_fund_raising(
         self,
@@ -523,6 +584,23 @@ class PostgreSQLCrud:
         __query = (
             f"SET search_path TO {get_postgresql_schema()}; UPDATE "
             f"funds SET raising_funds = False WHERE fund_name = '{fund_name}';"
+        )
+
+        return self.postgresql_instance.update(query=__query)
+
+    def deposit_fund(
+        self,
+        fund_name: str,
+        investor_id: int,
+        amount: float,
+    ) -> bool:
+        __query = (
+            "UPDATE development.funds SET capital_distribution ="
+            " JSONB_SET(capital_distribution, '{"
+            f"{investor_id}"
+            "}', "
+            f"'{amount}') WHERE"
+            f" fund_name='{fund_name}';"
         )
 
         return self.postgresql_instance.update(query=__query)

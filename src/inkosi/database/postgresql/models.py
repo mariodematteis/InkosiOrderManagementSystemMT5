@@ -6,6 +6,7 @@ from sqlalchemy import ARRAY, Boolean, Column, Date, DateTime, Float, Integer, S
 from sqlalchemy.dialects.postgresql import JSONB
 
 from inkosi.database.postgresql.database import PostgreSQLInstance
+from inkosi.database.postgresql.schemas import Tables
 
 
 @lru_cache
@@ -13,8 +14,8 @@ def get_instance() -> PostgreSQLInstance:
     return PostgreSQLInstance()
 
 
-class Administrator(get_instance().base):
-    __tablename__ = "administrators"
+class Administrators(get_instance().base):
+    __tablename__ = Tables.ADMINISTRATOR
 
     id: int = Column(
         Integer,
@@ -33,8 +34,8 @@ class Administrator(get_instance().base):
     active: bool = Column(Boolean, default=True)
 
 
-class Investor(get_instance().base):
-    __tablename__ = "investors"
+class Investors(get_instance().base):
+    __tablename__ = Tables.INVESTOR
 
     id: int = Column(
         Integer,
@@ -53,7 +54,7 @@ class Investor(get_instance().base):
 
 
 class Funds(get_instance().base):
-    __tablename__ = "funds"
+    __tablename__ = Tables.FUNDS
 
     id: int = Column(
         Integer,
@@ -68,13 +69,13 @@ class Funds(get_instance().base):
     investors: list[int] = Column(ARRAY(Integer), default=[])
     capital_distribution: dict = Column(JSONB, default={})
     commission_type: str = Column(String, default="percentual")
-    commission_value: str = Column(Float, default=0.0)
+    commission_value: float = Column(Float, default=0.0)
     risk_limits: bool = Column(Boolean, default=False)
     raising_funds: bool = Column(Boolean, default=True)
 
 
 class Authentication(get_instance().base):
-    __tablename__ = "authentication"
+    __tablename__ = Tables.AUTHENTICATION
 
     id: int = Column(
         String,
@@ -85,7 +86,7 @@ class Authentication(get_instance().base):
 
     created_at: datetime = Column(
         DateTime,
-        default=datetime.now(),
+        default=lambda _: datetime.now(),
         nullable=False,
     )
     validity: bool = Column(
@@ -97,3 +98,19 @@ class Authentication(get_instance().base):
     user_id: int = Column(Integer, nullable=False)
     mode: str = Column(String, nullable=False)
     ip_address: str = Column(String, nullable=True)
+
+
+class Strategies(get_instance().base):
+    __tablename__ = Tables.STRATEGIES
+
+    id: str = Column(
+        String,
+        primary_key=True,
+        index=True,
+        nullable=False,
+    )
+    name: str = Column(String, nullable=True)
+    created_at: datetime = Column(DateTime, nullable=False)
+    administrator_id: int = Column(Integer, nullable=True)
+    fund_names: list[str] = Column(ARRAY(String), default=[])
+    category: str = Column(String, nullable=True)
