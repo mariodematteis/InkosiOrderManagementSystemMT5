@@ -74,3 +74,28 @@ DefaultInvestors:
       - INVESTOR_SAMPLING_SCENARIOS
       - INVESTOR_BACKTEST_ALL
     active: True
+
+DefaultFunds:
+  DEMO:
+    administrators:
+      - 1234
+    commission_type: percentual
+    commission_value: 0
+    risk_limits: False
+    raising_funds: True
+
+DefaultStrategies:
+  - id: TERMINAL
+    administrator_id: 1234
+    fund_names:
+      - DEMO
+    category: GENERAL_PURPOSE
+  - id: API
+    fund_names:
+      - DEMO
+    category: GENERAL_PURPOSE
+
+Backtesting:
+  Tickers:
+    - ^GSPC
+    - ^IXIC
