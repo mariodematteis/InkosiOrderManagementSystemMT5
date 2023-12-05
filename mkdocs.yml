@@ -35,9 +35,9 @@ plugins:
   - search
   - mkdocstrings:
       handlers:
-          options:
-            paths: [ src ]
-            docstring_style: numpy
+        options:
+          paths: [ src ]
+          docstring_style: numpy
 
 markdown_extensions:
   - pymdownx.superfences:
