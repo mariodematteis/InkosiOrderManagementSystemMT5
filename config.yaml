@@ -99,3 +99,7 @@ Backtesting:
   Tickers:
     - ^GSPC
     - ^IXIC
+
+TradingTickers:
+  - US_500
+  - EURUSD

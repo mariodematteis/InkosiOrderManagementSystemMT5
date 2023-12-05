@@ -98,6 +98,7 @@ class Settings:
     RiskManagement: RiskManagement
     TechnicalIndicators: TechnicalIndicators
     Backtesting: Backtesting
+    TradingTickers: list
 
     DefaultAdministrators: dict[int, dict[str, str | date | list | None]] = field(
         default_factory=dict
@@ -254,3 +255,8 @@ def get_backtesting_settings() -> Backtesting:
 @lru_cache
 def get_default_tickers() -> list[str]:
     return get_backtesting_settings().Tickers
+
+
+@lru_cache
+def get_trading_tickers() -> list[str]:
+    return get_settings().TradingTickers

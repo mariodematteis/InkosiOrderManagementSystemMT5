@@ -8,9 +8,11 @@ import streamlit as st
 from fastapi import status
 from streamlit.components.v1 import html
 
+from inkosi.database.mongodb.schemas import Position
 from inkosi.database.postgresql.database import PostgreSQLCrud
 from inkosi.database.postgresql.schemas import CategoriesATS, FundInformation, UserRole
 from inkosi.log.log import Logger
+from inkosi.utils.settings import get_trading_tickers
 from inkosi.utils.utils import AdministratorPolicies, CommissionTypes, InvestorPolicies
 
 logger = Logger(module_name="app", package_name="web")
@@ -563,11 +565,83 @@ if state:
                     icon="🚨",
                 )
 
+    if (
+        st.session_state.get("role", UserRole.INVESTOR) == UserRole.ADMINISTRATOR
+        and not fund_information.raising_funds
+    ):
+        open_position = st.sidebar.expander(label="Open Position")
+        open_position_form = open_position.form(
+            key="Open Position Form",
+            clear_on_submit=True,
+        )
+        ticker_selection = open_position_form.selectbox(
+            label="Tickers Selection",
+            options=get_trading_tickers(),
+            placeholder="Select Financial Instrument",
+            label_visibility="hidden",
+        )
+        operation_selection = open_position_form.selectbox(
+            label="Operation",
+            options=Position.list(),
+            placeholder="Select Position",
+            label_visibility="hidden",
+        )
+        if open_position_form.form_submit_button(
+            "Open Position", use_container_width=True
+        ):
+            request = requests.post(
+                url="http://localhost:44444/api/v1/trading/position",
+                json={
+                    "fund_name": fund_selected,
+                    "market_order": "market_order",
+                    "operation": operation_selection,
+                    "ticker": ticker_selection,
+                },
+                headers={
+                    "Content-Type": "application/json",
+                },
+                timeout=8000,
+            )
+
+            if request.status_code == status.HTTP_200_OK:
+                st.info(
+                    body="Position correctly opened",
+                    icon="ℹ️",
+                )
+            else:
+                st.error(
+                    body="Unable to correctly open the position",
+                    icon="🚨",
+                )
+
+    if (
+        st.session_state.get("role", UserRole.INVESTOR) == UserRole.ADMINISTRATOR
+        and not fund_information.raising_funds
+    ):
+        close_position = st.sidebar.expander(label="Close Position")
+        close_position_form = close_position.form(
+            key="Close Position Form",
+            clear_on_submit=True,
+        )
+        position_selection = close_position_form.selectbox(
+            label="Position Selection",
+            options=get_trading_tickers(),
+            placeholder="Select Position",
+            label_visibility="hidden",
+        )
+        if close_position_form.form_submit_button(
+            "Close Position",
+            use_container_width=True,
+        ):
+            st.info(
+                body="Still defining the feature",
+                icon="🤖",
+            )
+
     if st.sidebar.button(
         "Backtesting Platform",
         use_container_width=True,
     ):
-        print(st.session_state.get("token"))
         open_page(f"http://localhost:8502/?token={st.session_state.get('token', '-')}")
 
     if fund_information.raising_funds:
