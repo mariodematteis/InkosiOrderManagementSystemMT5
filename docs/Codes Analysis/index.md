@@ -2,6 +2,5 @@
 
 ## Modules
 
-inkosi
-
-::: inkosi.utils
+#
+::: inkosi.utils.settings

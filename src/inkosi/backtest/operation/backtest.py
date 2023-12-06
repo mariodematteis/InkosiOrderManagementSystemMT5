@@ -4,11 +4,7 @@ import pandas_ta as ta
 import torch
 from numpy.typing import NDArray
 
-from inkosi.database.mongodb.schemas import Position
-from inkosi.log.log import Logger
-from inkosi.utils.settings import get_technical_indicators_values
-
-from .models import (
+from inkosi.backtest.operation.models import (
     TICKS_ASK_INDEX,
     TICKS_BID_INDEX,
     TICKS_DATETIME_INDEX,
@@ -17,7 +13,7 @@ from .models import (
     TradeResult,
     TradeStatus,
 )
-from .schemas import (
+from inkosi.backtest.operation.schemas import (
     AvailableRawColumns,
     AvailableTechincalIndicators,
     ComparisonElement,
@@ -25,6 +21,9 @@ from .schemas import (
     Filter,
     Relation,
 )
+from inkosi.database.mongodb.schemas import Position
+from inkosi.log.log import Logger
+from inkosi.utils.settings import get_technical_indicators_values
 
 logger = Logger(
     module_name="backtest",

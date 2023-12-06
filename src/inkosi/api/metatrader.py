@@ -25,12 +25,25 @@ logger = Logger(
 
 def check_mt5_available() -> bool:
     """
-    Checking for Metea
+    Check the availability of MetaTrader 5 (MT5) connection.
 
     Returns
     -------
     bool
-        _description_
+        Returns True if MT5 is available and the connection is established successfully,
+        False otherwise.
+
+    Notes
+    -----
+        This function checks for the availability of MetaTrader 5 (MT5) by verifying
+        the `MT5_AVAILABLE` flag. If the flag is False, the function returns False.
+
+        If the flag is True, the function attempts to initialize a connection to the
+        MT5 broker using the server, account, and password information obtained from
+        `get_environmental_settings()`.
+
+        Returns True if the connection is established successfully, and False otherwise.
+        In case of connection failure, an error message is logged using the logger.
     """
 
     if not MT5_AVAILABLE:
@@ -51,16 +64,72 @@ def check_mt5_available() -> bool:
 
 
 def initialize() -> bool:
+    """
+    Initialize the MetaTrader 5 (MT5) connection.
+
+    Returns
+    -------
+    bool
+        Returns True if the initialization is successful, False otherwise.
+
+    Notes
+    -----
+        This function is responsible for initializing the application.
+        It does so by checking the availability of MetaTrader 5 (MT5) through
+        the `check_mt5_available()` function.
+
+        Returns True if the MT5 connection is available and successfully
+        established, and False otherwise.
+    """
+
     return check_mt5_available()
 
 
 def shutdown() -> None:
+    """
+    Shutdown the MetaTrader 5 (MT5) connection.
+
+    Returns
+    -------
+    None
+
+    Note:
+        This function checks the availability of MetaTrader 5 (MT5) through
+        the `check_mt5_available()` function and then proceeds to shut down
+        the MT5 connection using `mt5.shutdown()`.
+
+        This function is designed to gracefully shut down the application
+        by closing the MT5 connection if it is available.
+    """
+
     check_mt5_available()
     mt5.shutdown()
 
 
 @lru_cache
 def get_all_symbols_available() -> list[str] | None:
+    """
+    Get a list of all available symbols from MetaTrader 5 (MT5).
+
+    Returns
+    -------
+    list[str] | None
+        A list of symbol names if initialization is successful, None otherwise.
+
+    Notes
+    -----
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function initializes the application using `initialize()` and,
+        if successful, retrieves a list of all available symbols from MT5
+        using `mt5.symbols_get()`.
+
+        Returns a list of symbol names if initialization is successful, and
+        returns None if initialization fails or if no symbols are found.
+        In case of failure, a critical log message is recorded using the logger.
+    """
+
     if initialize():
         return [symbol._asdict().get("name", "") for symbol in list(mt5.symbols_get())]
 
@@ -70,6 +139,33 @@ def get_all_symbols_available() -> list[str] | None:
 def check_for_financial_product_existence(
     financial_product: str,
 ) -> bool:
+    """
+    Check if a financial product exists in the available symbols from
+    MetaTrader 5 (MT5).
+
+    Parameters
+    ----------
+    financial_product : str
+        The name of the financial product to check.
+
+    Returns
+    -------
+    bool
+        True if the financial product exists, False otherwise.
+
+    Notes
+    -----
+        This function checks if a specified financial product exists in the list of
+        available symbols retrieved from MetaTrader 5 (MT5) using
+        `get_all_symbols_available()`.
+
+        Returns True if the financial product is found in the list of available symbols,
+        and False otherwise. If no symbols are available, the function returns False.
+
+        The `get_all_symbols_available()` function is used to retrieve the list of
+        available symbols.
+    """
+
     symbols_list = get_all_symbols_available()
     if not symbols_list:
         return False
@@ -80,13 +176,64 @@ def check_for_financial_product_existence(
 def check_for_positions_opened_on_symbol(
     symbol: str,
 ) -> int | None:
+    """
+    Check for the number of open positions on a specific symbol in MetaTrader 5 (MT5).
+
+    Parameters
+    ----------
+    symbol: str
+        The symbol for which to check open positions.
+
+    Returns
+    -------
+    int | None
+        The number of open positions on the specified symbol, or None if initialization
+        fails.
+
+    Notes
+    -----
+        This function checks for the number of open positions on a specified symbol
+        in MetaTrader 5 (MT5). It initializes the application using `initialize()`
+        and, if successful, retrieves the open positions for the specified symbol
+        using `mt5.positions_get(symbol=symbol)`.
+
+        Returns the number of open positions if initialization is successful,
+        and returns None if initialization fails or if there are no open positions.
+    """
+
     if not initialize():
         return
+
     return mt5.positions_get(symbol=symbol)
 
 
-# TODO: Add hinting
-def get_symbol_filling(symbol: str,) -> int | None:
+def get_symbol_filling(
+    symbol: str,
+) -> int | None:
+    """
+    Check for the number of open positions on a specific symbol in MetaTrader 5 (MT5).
+
+    Parameters
+    ----------
+    symbol : str
+        The symbol for which to check open positions.
+
+    Returns
+    -------
+    int | None
+        The number of open positions on the specified symbol, or None if initialization
+        fails.
+
+    Note:
+        This function checks for the number of open positions on a specified symbol
+        in MetaTrader 5 (MT5). It initializes the application using `initialize()`
+        and, if successful, retrieves the open positions for the specified symbol
+        using `mt5.positions_get(symbol=symbol)`.
+
+        Returns the number of open positions if initialization is successful,
+        and returns None if initialization fails or if there are no open positions.
+    """
+
     if not initialize() or not check_for_financial_product_existence(symbol):
         return
 
@@ -104,10 +251,35 @@ def get_symbol_filling(symbol: str,) -> int | None:
             return mt5.ORDER_FILLING_RETURN
 
 
-# TODO: Check if returns less or equal to 0 when the market is closed on that product
 def get_ask_of_symbol(
     symbol: str,
 ) -> float:
+    """
+    Get the ask price of a specific symbol from MetaTrader 5 (MT5).
+
+    Parameters
+    ----------
+    symbol : str
+        The symbol for which to retrieve the ask price.
+
+    Returns
+    -------
+    float
+        The ask price of the specified symbol.
+
+    Notes
+    -----
+        This function retrieves the ask price of a specific symbol from MetaTrader 5
+        (MT5) using `mt5.symbol_info_tick(symbol).ask`. It checks if the ask price is
+        greater than 0 and returns the ask price if it is.
+
+        If the ask price is not greater than 0, the function makes a recursive call to
+        itself until a valid ask price is obtained.
+
+        It is important to ensure that this function does not result in an infinite
+        recursion by ensuring that valid ask prices are eventually obtained.
+    """
+
     ask = mt5.symbol_info_tick(symbol).ask
     if ask > 0:
         return ask
@@ -115,7 +287,35 @@ def get_ask_of_symbol(
         get_ask_of_symbol(symbol)
 
 
-def get_bid_of_symbol(symbol: str) -> float:
+def get_bid_of_symbol(
+    symbol: str,
+) -> float:
+    """
+    Get the bid price of a specific symbol from MetaTrader 5 (MT5).
+
+    Parameters
+    ----------
+    symbol : str
+        The symbol for which to retrieve the bid price.
+
+    Returns
+    -------
+    float
+        The bid price of the specified symbol.
+
+    Notes
+    -----
+        This function retrieves the bid price of a specific symbol from MetaTrader 5
+        (MT5) using `mt5.symbol_info_tick(symbol).bid`. It checks if the bid price is
+        greater than 0 and returns the bid price if it is.
+
+        If the bid price is not greater than 0, the function makes a recursive call to
+        itself until a valid bid price is obtained.
+
+        It is important to ensure that this function does not result in an infinite
+        recursion by ensuring that valid bid prices are eventually obtained.
+    """
+
     bid = mt5.symbol_info_tick(symbol).bid
     if bid > 0:
         return bid
@@ -126,6 +326,32 @@ def get_bid_of_symbol(symbol: str) -> float:
 def check_symbol_market_opened(
     symbol: str,
 ) -> bool:
+    """
+    Check if the market for a specific symbol is currently open.
+
+    Parameters
+    ----------
+    symbol : str
+        The symbol for which to check market openness.
+
+    Returns
+    -------
+    bool
+        True if the market for the specified symbol is currently open, False otherwise.
+
+    Notes
+    -----
+        This function checks if the market for a specific symbol is currently open by
+        retrieving information using `mt5.symbol_info(symbol)`. If information about
+        the symbol cannot be fetched, an error is logged, and the function returns
+        False.
+
+        The function also checks the time information of the symbol to determine if the
+        market is currently open. If the time information is less than the current time
+        minus 1 second, it is considered closed, and the function returns False.
+        Otherwise, it returns True.
+    """
+
     symbol_information = mt5.symbol_info(symbol)
 
     if not symbol_information:

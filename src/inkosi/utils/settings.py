@@ -8,23 +8,18 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class EnvSettings(BaseSettings):
     """
-    Settings class for MetaTrader 5 (MT5) account access.
+    Settings class for configuring MetaTrader 5 (MT5) account information.
 
-    This class inherits from BaseSettings and includes configuration options
-    for specifying the environment file, environment variable prefix, and
-    case sensitivity for settings.
+    This class inherits from BaseSettings and includes configuration options for
+    specifying the environment file, environment variable prefix, and case sensitivity
+    for settings.
 
-    Parameters
-    ----------
-    ACCOUNT: int
-        MetaTrader 5 account number.
-    PASSWORD: str
-        Password for the MetaTrader 5 account.
-    SERVER: str
-        MetaTrader 5 server name.
+    Settings:
+        ACCOUNT (int): MetaTrader 5 account number.
+        PASSWORD (str): Password for the MetaTrader 5 account.
+        SERVER (str): MetaTrader 5 server name.
 
-    Notes
-    -----
+    Note:
         The settings ACCOUNT, PASSWORD, and SERVER correspond to MetaTrader 5
         account information.
     """
@@ -43,24 +38,19 @@ class EnvSettings(BaseSettings):
 @dataclass
 class TimeActivity:
     """
-    Data class representing the maximum amount of time before the generated
-    token for access expires.
+    Data class representing the maximum amount of time before the generated token for
+    access expires.
 
-    Parameters
-    ----------
-    days: int
-        Number of days until token expiration.
-    hours: int
-        Number of hours until token expiration.
-    minutes: int
-        Number of minutes until token expiration.
-    seconds: int
-        Number of seconds until token expiration.
+    Attributes:
+        days (int): Number of days until token expiration.
+        hours (int): Number of hours until token expiration.
+        minutes (int): Number of minutes until token expiration.
+        seconds (int): Number of seconds until token expiration.
 
-    Notes
-    -----
+    Note:
         This class is designed to hold information about the time duration
-        before an access token expires. It is commonly used in login scenarios.
+        before an access token expires. It is commonly used in scenarios where
+        access tokens have a limited validity period.
     """
 
     days: int
@@ -86,24 +76,21 @@ class PostgreSQL:
     Data class representing the configuration details for connecting to a PostgreSQL
     database.
 
-    Parameters
-    ----------
-    PROTOCOL: str
-        Protocol used for the connection, generally "postgresql"
-    USERNAME: str
-        Username for authenticating the database connection.
-    PASSWORD: str
-        Password for authenticating the database connection.
-    HOSTNAME: str
-        Hostname or IP address of the PostgreSQL server.
-    PORT: str
-        Port number on which the PostgreSQL server is listening.
-    DATABASE: str
-        Name of the PostgreSQL database to connect to.
-    SCHEMA: str
-        Name of the database schema to use.
-    PARAMETERS: str
-        Additional connection parameters as a string.
+    Attributes:
+        PROTOCOL (str): Protocol used for the connection (e.g., "postgresql").
+        USERNAME (str): Username for authenticating the database connection.
+        PASSWORD (str): Password for authenticating the database connection.
+        HOSTNAME (str): Hostname or IP address of the PostgreSQL server.
+        PORT (int): Port number on which the PostgreSQL server is listening.
+        DATABASE (str): Name of the PostgreSQL database to connect to.
+        SCHEMA (str): Name of the database schema to use.
+        PARAMETERS (str): Additional connection parameters as a string.
+
+    Note:
+        This class is designed to hold the configuration details required for connecting
+        to a PostgreSQL database. It includes information such as the protocol,
+        username, password, hostname, port, database name, schema, and additional
+        parameters.
     """
 
     PROTOCOL: str
@@ -122,27 +109,24 @@ class MongoDB:
     Data class representing the configuration details for connecting to a MongoDB
     database.
 
-    Parameters
-    ----------
-    PROTOCOL: str
-        Protocol used for the connection (e.g., "mongodb" or "mongodb+srv").
-    USERNAME: str
-        Username for authenticating the MongoDB connection.
-    PASSWORD: str
-        Password for authenticating the MongoDB connection.
-    HOSTNAME: str
-        Hostname or IP address of the MongoDB server.
-    PORT: int
-        Port number on which the MongoDB server is listening.
-    DATABASE: str
-        Name of the MongoDB database to connect to.
-    PARAMETERS: str
-        Additional connection parameters as a string.
-    TLS: bool
-        Flag indicating whether to use TLS/SSL for the connection.
-    COLLECTIONS: MongoDBCollections
-        An instance of the MongoDBCollections class, representing the collections within
-        the MongoDB database.
+    Attributes:
+        PROTOCOL (str): Protocol used for the connection (e.g., "mongodb" or
+        "mongodb+srv").
+        USERNAME (str): Username for authenticating the MongoDB connection.
+        PASSWORD (str): Password for authenticating the MongoDB connection.
+        HOSTNAME (str): Hostname or IP address of the MongoDB server.
+        PORT (int): Port number on which the MongoDB server is listening.
+        DATABASE (str): Name of the MongoDB database to connect to.
+        PARAMETERS (str): Additional connection parameters as a string.
+        TLS (bool): Flag indicating whether to use TLS/SSL for the connection.
+
+        COLLECTIONS (MongoDBCollections): An instance of the MongoDBCollections class,
+            representing the collections within the MongoDB database.
+
+    Note:
+        This class is designed to hold the configuration details required for connecting
+        to a MongoDB database. It includes information such as the protocol, username,
+        password, hostname, port, database name, parameters, TLS usage, and collections.
     """
 
     PROTOCOL: str
@@ -162,20 +146,25 @@ class API:
     """
     Data class representing the configuration details for an API.
 
-    Parameters
-    ----------
-    AllowedIPAddresses: str | list
-        Allowed IP addresses for API access. This can be a single IP address (string)
-        or a list of IP addresses.
-    TokenAuthentication: bool
-        Flag indicating whether token authentication is required.
-    IPAddressCorrespondence: bool
-        Flag indicating whether IP address correspondence is checked.
-    TimeActivity: TimeActivity
-        An instance of the TimeActivity class representing the maximum amount of time
-        before the generated token for access expires.
-    APIs: list
-        List of APIs associated with the configuration.
+    Attributes:
+        AllowedIPAddresses (str | list): Allowed IP addresses for API access.
+            This can be a single IP address (string) or a list of IP addresses.
+
+        TokenAuthentication (bool): Flag indicating whether token authentication is
+        required.
+
+        IPAddressCorrespondence (bool): Flag indicating whether IP address
+        correspondence is checked.
+
+        TimeActivity (TimeActivity): An instance of the TimeActivity class representing
+            the maximum amount of time before the generated token for access expires.
+
+        APIs (List): List of APIs associated with the configuration.
+
+    Note:
+        This class is designed to hold the configuration details for an API. It includes
+        information such as allowed IP addresses, token authentication, IP address
+        correspondence, time activity settings, and a list of associated APIs.
     """
 
     AllowedIPAddresses: str | list
@@ -190,16 +179,13 @@ class Policies:
     """
     Data class representing access policies for different user roles.
 
-    Parameters
-    ----------
-    Administrator: list[str]
-        List of policies for users with the Administrator role.
-    Investor: list[str]
-        List of policies for users with the Investor role.
+    Attributes:
+        Administrator (list[str]): List of policies for users with the Administrator
+        role. Investor (list[str]): List of policies for users with the Investor role.
 
-    Notes
-    -----
-    To the state of art, for the A
+    Note:
+        This class is designed to hold access policies for different user roles.
+        It includes lists of policies for Administrators and Investors.
     """
 
     Administrator: list[str]
@@ -211,11 +197,14 @@ class RiskManagement:
     """
     Data class representing risk management configuration.
 
-    Parameters
-    ----------
-    Models: list | None
-        List of risk management models. If None, no specific risk management models are
-        defined.
+    Attributes:
+        Models (list | None): List of risk management models.
+            If None, no specific risk management models are defined.
+
+    Note:
+        This class is designed to hold the configuration for risk management.
+        It includes a list of risk management models, which can be None if no
+        specific models are defined.
     """
 
     Models: list | None
@@ -226,10 +215,14 @@ class TechnicalIndicators:
     """
     Data class representing configuration for technical indicators.
 
-    Parameters
-    ----------
-    MovingAveragePeriod: int | float
-        Period for the moving average. This can be an integer or a float value.
+    Attributes:
+        MovingAveragePeriod (int | float): Period for the moving average.
+            This can be an integer or a float value.
+
+    Note:
+        This class is designed to hold the configuration for technical indicators.
+        It includes the period for the moving average, which can be either an integer
+        or a float value.
     """
 
     MovingAveragePeriod: int | float
@@ -240,22 +233,23 @@ class Settings:
     """
     Data class representing a configuration settings bundle.
 
-    Parameters
-    ----------
-    PostgreSQL: PostgreSQL
-        Configuration settings for connecting to a PostgreSQL database.
-    MongoDB: MongoDB
-        Configuration settings for connecting to a MongoDB database.
-    API: API
-        Configuration settings for an API.
-    Policies: Policies
-        Access policies for different user roles.
-    RiskManagement: RiskManagement
-        Configuration settings for risk management.
-    TechnicalIndicators: TechnicalIndicators
-        Configuration for technical indicators.
-    DockerInstance: bool
-        Flag indicating whether the application is running in a Docker instance.
+    Attributes:
+        PostgreSQL (PostgreSQL): Configuration settings for connecting to a PostgreSQL
+        database.
+        MongoDB (MongoDB): Configuration settings for connecting to a MongoDB database.
+        API (API): Configuration settings for an API.
+        Policies (Policies): Access policies for different user roles.
+        RiskManagement (RiskManagement): Configuration settings for risk management.
+        TechnicalIndicators (TechnicalIndicators): Configuration for technical
+        indicators.
+
+        DockerInstance (bool): Flag indicating whether the application is running in a
+        Docker instance.
+
+    Note:
+        This class is designed to hold a comprehensive set of configuration settings
+        for various components, including databases, APIs, access policies, risk
+        management, technical indicators, and Docker instance information.
     """
 
     PostgreSQL: PostgreSQL
@@ -271,13 +265,15 @@ class Settings:
 @lru_cache
 def get_environmental_settings() -> EnvSettings:
     """
-    Function to fetch environmental settings using caching.
+    Function to retrieve environmental settings using caching.
 
-    Returns
-    -------
-    EnvSettings
-        An instance of the EnvSettings class representing the environmental
-        configuration settings.
+    Returns:
+        EnvSettings: An instance of the EnvSettings class representing
+        the environmental configuration settings.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result
     """
 
     return EnvSettings()
@@ -288,11 +284,9 @@ def get_settings() -> Settings:
     """
     Function to fetch application settings using caching.
 
-    Returns
-    -------
-    Settings
-        An instance of the Settings class representing the overall configuration
-        settings for the application.
+    Returns:
+        Settings: An instance of the Settings class representing the overall
+        configuration settings for the application.
     """
 
     settings_import = OmegaConf.load(
@@ -313,11 +307,9 @@ def get_postgresql_settings() -> PostgreSQL:
     """
     Function to fetch PostgreSQL settings using caching.
 
-    Returns
-    -------
-    PostgreSQL
-        An instance of the PostgreSQL class representing the overall configuration
-        settings for the PostgreSQL Instance.
+    Returns:
+        PostgreSQL: An instance of the PostgreSQL class representing the overall
+        configuration settings for the PostgreSQL Instance.
     """
 
     return get_settings().PostgreSQL
@@ -326,13 +318,18 @@ def get_postgresql_settings() -> PostgreSQL:
 @lru_cache
 def get_postgresql_schema() -> str:
     """
-    Function to fetch PostgreSQL Schema settings using caching.
+    Get the PostgreSQL schema from the configuration settings.
 
-    Returns
-    -------
-    Settings
-        An instance of the Settings class representing the overall configuration
-        settings for the application.
+    Returns:
+        str: The PostgreSQL schema obtained from the configuration settings.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function retrieves the PostgreSQL schema from the configuration settings
+        using `get_postgresql_settings()`. It then returns the obtained schema as a
+        string.
     """
 
     return get_postgresql_settings().SCHEMA
@@ -340,6 +337,26 @@ def get_postgresql_schema() -> str:
 
 @lru_cache
 def get_postgresql_url() -> str:
+    """
+    Get the PostgreSQL connection URL from the configuration settings.
+
+    Returns
+    -------
+    str
+        The PostgreSQL connection URL constructed from the configuration settings.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function retrieves PostgreSQL configuration settings from the overall
+        application settings using `get_settings()`. It then constructs the PostgreSQL
+        connection URL by combining the protocol, username, password, hostname, port,
+        and database information from the configuration settings.
+
+        Returns the constructed PostgreSQL connection URL as a string.
+    """
+
     postgresql_settings: PostgreSQL = get_settings().PostgreSQL
 
     return (
@@ -353,16 +370,43 @@ def get_postgresql_url() -> str:
 
 @lru_cache
 def get_mongodb_settings() -> MongoDB:
+    """
+    Get the MongoDB configuration settings.
+
+    Returns:
+        MongoDB: An instance of the MongoDB configuration settings obtained from the
+        overall application settings.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+    """
+
     return get_settings().MongoDB
 
 
 @lru_cache
-def get_mongodb_collection() -> MongoDBCollections:
-    return get_mongodb_settings().COLLECTIONS
-
-
-@lru_cache
 def get_mongodb_url() -> str:
+    """
+    Get the MongoDB connection URL from the configuration settings.
+
+    Returns
+    -------
+    str
+        The MongoDB connection URL constructed from the configuration settings.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function retrieves MongoDB configuration settings from the overall
+        application settings using `get_settings()`. It then constructs the MongoDB
+        connection URL by combining the protocol, username, password, hostname, port,
+        and parameters information from the configuration settings.
+
+        Returns the constructed MongoDB connection URL as a string.
+    """
+
     mongodb_settings = get_settings().MongoDB
 
     return (
@@ -377,44 +421,201 @@ def get_mongodb_url() -> str:
 
 @lru_cache
 def get_api_settings() -> API:
+    """
+    Get the API configuration settings.
+
+    Returns:
+        API: An instance of the API configuration settings obtained from the overall
+        application settings.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function retrieves API configuration settings from the overall
+        application settings using `get_settings()`.
+
+        Returns an instance of the API configuration settings.
+    """
+
     return get_settings().API
 
 
 @lru_cache
 def get_allowed_ip_addresses() -> list | str:
+    """
+    Get the allowed IP addresses from the API configuration.
+
+    Returns:
+        list | str: A list of allowed IP addresses or a string specifying IP address
+        correspondence, obtained from the API configuration.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function retrieves the allowed IP addresses from the API configuration
+        using `get_api_settings()`.
+
+        Returns a list of allowed IP addresses or a string specifying IP address
+        correspondence.
+    """
+
     return get_api_settings().AllowedIPAddresses
 
 
 @lru_cache
 def get_ip_address_correspondence() -> bool:
+    """
+    Get the IP address correspondence setting from the API configuration.
+
+    Returns:
+        bool: True if IP address correspondence is enabled, False otherwise.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function retrieves the IP address correspondence setting from the API
+        configuration using `get_api_settings()`.
+
+        Returns True if IP address correspondence is enabled, and False otherwise.
+    """
+
     return get_api_settings().IPAddressCorrespondence
 
 
 @lru_cache
 def get_time_activity() -> dict:
+    """
+    Get the time activity configuration from the API settings.
+
+    Returns
+    -------
+    dict
+        A dictionary containing time activity configuration obtained from the API
+        settings.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function retrieves time activity configuration from the API settings
+        using `get_api_settings()`.
+
+        Returns a dictionary containing time activity configuration.
+    """
+
     return get_api_settings().TimeActivity
 
 
 @lru_cache
 def get_administrators_policies() -> list:
+    """
+    Get the policies for administrators.
+
+    Returns:
+        list: A list of policies for administrators obtained from the overall
+        application settings.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function retrieves policies for administrators from the overall application
+        settings using `get_settings()`.
+
+        Returns a list of policies for administrators.
+    """
+
     return get_settings().Policies.Administrator
 
 
 @lru_cache
 def get_investors_policies() -> list:
+    """
+    Get the policies for investors.
+
+    Returns:
+        list: A list of policies for investors obtained from the overall application
+        settings.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function retrieves policies for investors from the overall application
+        settings using `get_settings()`.
+
+        Returns a list of policies for investors.
+    """
+
     return get_settings().Policies.Investor
 
 
 @lru_cache
 def get_risk_management() -> RiskManagement:
+    """
+    Get the risk management configuration settings.
+
+    Returns:
+        RiskManagement: An instance of the risk management configuration settings
+        obtained from the overall application settings.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function retrieves risk management configuration settings from the overall
+        application settings using `get_settings()`.
+
+        Returns an instance of the risk management configuration settings.
+    """
+
     return get_settings().RiskManagement
 
 
 @lru_cache
 def get_risk_management_models() -> list | None:
+    """
+    Get the risk management models.
+
+    Returns:
+        list | None: A list of risk management models obtained from the overall
+        application settings, or None if no models are specified.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function retrieves risk management models from the overall application
+        settings using `get_risk_management()`.
+
+        Returns a list of risk management models or None if no models are specified.
+    """
+
     return get_risk_management().Models
 
 
 @lru_cache
 def get_technical_indicators_values() -> TechnicalIndicators:
+    """
+    Get the configuration values for technical indicators.
+
+    Returns
+    -------
+    TechnicalIndicators
+        An instance of the technical indicators configuration settings obtained from the
+        overall application settings.
+
+    Note:
+        This function is decorated with the LRU (Least Recently Used) cache,
+        which helps in caching the result of the function to improve performance.
+
+        The function retrieves technical indicators configuration settings from the
+        overall application settings using `get_settings()`.
+
+        Returns an instance of the technical indicators configuration settings.
+    """
+
     return get_settings().TechnicalIndicators

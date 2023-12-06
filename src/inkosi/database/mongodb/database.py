@@ -22,6 +22,10 @@ logger = Logger(module_name="MongoDBDatabase", package_name="mongodb", database=
 class DatabaseInstanceSingleton(
     type,
 ):
+    """
+    Singleton metaclass for managing a database connection instance.
+    """
+
     _instance = None
 
     def __call__(
@@ -29,6 +33,18 @@ class DatabaseInstanceSingleton(
         *args,
         **kwargs,
     ):
+        """
+        Override the __call__ method to implement the singleton pattern.
+
+        Args:
+            cls: The class.
+            *args: Additional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            The database connection instance.
+        """
+
         if not cls._instance or not cls._instance.is_connected():
             cls._instance = super(
                 type(
@@ -46,12 +62,24 @@ class DatabaseInstanceSingleton(
 class MongoDBInstance(
     metaclass=DatabaseInstanceSingleton,
 ):
+    """
+    Singleton class for managing a connection to a MongoDB database.
+    """
+
     client: MongoClient = None
     database: Database = None
 
     def __init__(
         self,
     ) -> None:
+        """
+        Initialize the MongoDBInstance.
+
+        Raises:
+            MongoConnectionError: If unable to establish a connection with the MongoDB
+            Instance.
+        """
+
         try:
             if get_mongodb_settings().TLS:
                 self.client = MongoClient(
@@ -74,6 +102,13 @@ class MongoDBInstance(
     def is_connected(
         self,
     ) -> bool:
+        """
+        Check if the MongoDB instance is connected.
+
+        Returns:
+            bool: True if connected, False otherwise.
+        """
+
         try:
             if not isinstance(
                 self.client,
@@ -92,6 +127,10 @@ class MongoDBInstance(
     def close_database_connection(
         self,
     ) -> None:
+        """
+        Close the connection to the MongoDB database.
+        """
+
         self.client.close()
 
 
@@ -294,8 +333,6 @@ class MongoDBCrud:
                 },
             ]
         )
-
-        # TODO: Group by date
 
         if not records:
             logger.critical(message="No record has been found")
