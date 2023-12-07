@@ -1,7 +1,16 @@
 # Codes Analysis
 
+## Introduction
+
 ## Modules
 
-inkosi
-
-::: inkosi.utils
+- API
+- App
+- Backtest
+- Database
+- Log
+- Mailing _(Under development)_
+- Portfolio _(Under development)_
+- Scheduler _(Under development)_
+- Utils
+- Web
