@@ -12,15 +12,15 @@ class Dataset:
 
     Parameters:
         source (str or Asset): The data source, which can be a string representing a SQL
-        table, a file path for CSV, HDF, or Parquet,
-        or an Asset object for custom data.
+            table, a file path for CSV, HDF, or Parquet,
+            or an Asset object for custom data.
         source_type (SourceType): The type of the data source.
         **kwargs: Additional keyword arguments passed to the specific data loading
-        function.
+            function.
 
     Attributes:
         postgres_instance (PostgreSQLInstance): An instance of PostgreSQLInstance used
-        for SQL data loading.
+            for SQL data loading.
         dataset (pd.DataFrame): The loaded dataset as a Pandas DataFrame.
         np_dataset (NDArray): The dataset converted to a NumPy array.
 
@@ -38,12 +38,12 @@ class Dataset:
         Constructor for the Dataset class.
 
         Parameters:
-            source (str or Asset): The data source, which can be a string representing a
-            SQL table, a file path for CSV, HDF, or Parquet, or an Asset object for
-            custom data.
+            source (str | Asset): The data source, which can be a string representing a
+                SQL table, a file path for CSV, HDF, or Parquet, or an Asset object for
+                custom data.
             source_type (SourceType): The type of the data source.
             **kwargs: Additional keyword arguments passed to the specific data loading
-            function.
+                function.
         """
 
         self.postgres_instance = PostgreSQLInstance()
@@ -92,8 +92,8 @@ class Dataset:
         Returns the NumPy array representation of the loaded dataset.
 
         Returns:
-            NDArray or None: The NumPy array representing the dataset or None if the
-            dataset is not loaded.
+            (NDArray | None): The NumPy array representing the dataset or None if the
+                dataset is not loaded.
         """
 
         return self.np_dataset

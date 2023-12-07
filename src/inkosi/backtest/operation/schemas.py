@@ -179,8 +179,8 @@ class Filter:
     Attributes:
         first_element (ComparisonElement): The first element for comparison.
         second_element (ComparisonElement): The second element for comparison.
-        relation (Relation | None): The relational operator for the comparison
-        (optional).
+        relation (Relation | None, optional): The relational operator for the
+            comparison.
     """
 
     first_element: ComparisonElement

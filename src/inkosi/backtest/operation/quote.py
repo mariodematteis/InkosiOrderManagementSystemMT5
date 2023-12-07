@@ -27,7 +27,7 @@ class Quote(metaclass=QuoteMetaclass):
         time_frame (str): The time frame for data intervals. Default is "1d" (1 day).
         logger (Logger): Logger instance for logging messages.
         financial_instruments (dict): A dictionary to store downloaded financial
-        instrument quotes.
+            instrument quotes.
     """
 
     def __init__(
@@ -39,10 +39,10 @@ class Quote(metaclass=QuoteMetaclass):
         Initializes a Quote instance.
 
         Parameters:
-            period (str): The time period for historical data.
-            Default is "1y" (1 year).
-            time_frame (str): The time frame for data intervals.
-            Default is "1d" (1 day).
+            period (str, default "1y"): The time period for historical data.
+                Default is "1y" (1 year).
+            time_frame (str, default "1d"): The time frame for data intervals.
+                Default is "1d" (1 day).
         """
 
         self.period = period
@@ -67,9 +67,9 @@ class Quote(metaclass=QuoteMetaclass):
             end (date): The end date for historical data. Default is None.
 
         Returns:
-            dict[str, list] or None: A dictionary containing financial instrument
-            quotes (Dates, Open, High, Low, Close, Returns) or None if the download
-            fails.
+            (dict[str, list] or None): A dictionary containing financial instrument
+                quotes (Dates, Open, High, Low, Close, Returns) or None if the download
+                fails.
         """
 
         quote = yf.Ticker(ticker)
@@ -113,6 +113,6 @@ class Quote(metaclass=QuoteMetaclass):
         instance.
 
         Returns:
-            str: A string representation of the financial instruments.
+            (str): A string representation of the financial instruments.
         """
         return str(self.financial_instruments)

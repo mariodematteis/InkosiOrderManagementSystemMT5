@@ -23,10 +23,10 @@ class Logger:
         Parameters:
             module_name (str): The name of the module for which the logger is created.
             log_filename (str | None, optional): The filename for the log file. Defaults
-            to "master.log".
+                to "master.log".
             level (int, optional): The logging level. Defaults to logging.DEBUG.
             formatter (str, optional): The log message format. Defaults to
-            "[%(asctime)s\t %(levelname)s\t %(name)s] %(message)s".
+                "[%(asctime)s\t %(levelname)s\t %(name)s] %(message)s".
             **kwargs: Additional keyword arguments.
 
         Attributes:

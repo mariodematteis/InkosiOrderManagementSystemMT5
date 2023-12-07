@@ -31,7 +31,7 @@ def check_mt5_available() -> bool:
     Check the availability of MetaTrader 5 (MT5) connection.
 
     Returns:
-        bool: Returns True if MT5 is available and the connection is established
+        (bool): Returns True if MT5 is available and the connection is established
             successfully, False otherwise.
 
     Note:
@@ -68,7 +68,7 @@ def initialize() -> bool:
     Initialize MetaTrader 5 (MT5) platform.
 
     Returns:
-        bool: True if initialization is successful, False otherwise.
+        (bool): True if initialization is successful, False otherwise.
     """
 
     return check_mt5_available()
@@ -89,7 +89,7 @@ def get_all_symbols_available() -> list[str] | None:
     Get a list of all available symbols on MetaTrader 5 (MT5) platform.
 
     Returns:
-        list[str] or None: A list of symbol names if available, or None if
+        (list[str] | None): A list of symbol names if available, or None if
             initialization fails.
     """
 
@@ -110,7 +110,7 @@ def check_for_financial_product_existence(
         financial_product (str): The name of the financial product to check.
 
     Returns:
-        bool: True if the financial product exists, False otherwise.
+        (bool): True if the financial product exists, False otherwise.
     """
 
     symbols_list = get_all_symbols_available()
@@ -131,7 +131,7 @@ def check_for_positions_opened_on_symbol(
         symbol (str): The symbol name to check for open positions.
 
     Returns:
-        int or None: The number of open positions on the symbol if available, or None
+        (int | None): The number of open positions on the symbol if available, or None
             if initialization fails.
     """
     if not initialize():
@@ -149,7 +149,7 @@ def get_symbol_filling(
     symbol (str): The name of the symbol to retrieve filling mode information.
 
     Returns:
-        int or None: The filling mode constant (ORDER_FILLING_FOK, ORDER_FILLING_IOC,
+        (int | None): The filling mode constant (ORDER_FILLING_FOK, ORDER_FILLING_IOC,
             ORDER_FILLING_RETURN) if available, or None if initialization fails or the
             symbol information cannot be retrieved.
     """
@@ -181,7 +181,7 @@ def get_ask_of_symbol(
         symbol (str): The name of the symbol to retrieve the ask price.
 
     Returns:
-        float: The ask price if available, or recursively calls itself until a valid
+        (float): The ask price if available, or recursively calls itself until a valid
             ask price is obtained.
     """
 
@@ -202,7 +202,7 @@ def get_bid_of_symbol(
         symbol (str): The name of the symbol to retrieve the bid price.
 
     Returns:
-        float: The bid price if available, or recursively calls itself until a valid
+        (float): The bid price if available, or recursively calls itself until a valid
             bid price is obtained.
     """
     bid = mt5.symbol_info_tick(symbol).bid
@@ -222,7 +222,7 @@ def check_symbol_market_opened(
         symbol (str): The name of the symbol to check for market openness.
 
     Returns:
-        bool: True if the market is open for the symbol, False otherwise.
+        (bool): True if the market is open for the symbol, False otherwise.
     """
 
     symbol_information = mt5.symbol_info(symbol)

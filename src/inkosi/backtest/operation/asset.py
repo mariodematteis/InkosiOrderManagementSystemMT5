@@ -18,7 +18,7 @@ class Asset:
         period (str): The time period for historical data. Default is "1y" (1 year).
         time_frame (str): The time frame for data intervals. Default is "1d" (1 day).
         quote (Quote): An instance of the Quote class for downloading financial
-        instrument quotes.
+            instrument quotes.
         result (dict): The result of downloading financial instrument quotes.
     """
 
@@ -35,12 +35,14 @@ class Asset:
 
         Parameters:
             asset_name (str): The name of the financial asset.
-            period (str): The time period for historical data.
-            Default is "1y" (1 year).
-            time_frame (str): The time frame for data intervals.
-            Default is "1d" (1 day).
-            start (date): The start date for historical data. Default is None.
-            end (date): The end date for historical data. Default is None.
+            period (str, default "1y"): The time period for historical data.
+                Default is "1y" (1 year).
+            time_frame (str, default "1d"): The time frame for data intervals.
+                Default is "1d" (1 day).
+            start (date, optional, default None): The start date for historical data.
+                Default is None.
+            end (date, optional, default None): The end date for historical data.
+                Default is None.
         """
 
         self.asset_name = asset_name
@@ -67,9 +69,9 @@ class Asset:
         Parameters:
             sampling_method (SamplingMethods): The method used for generating samples.
             steps_forward (int): The number of steps forward in time for each sample.
-            column (str): The column of historical data to use for sampling. Default is
-            "Close Price".
-            samples (int): The number of samples to generate. Default is 1.
+            column (str, default "Close Price"): The column of historical data to use
+                for sampling. Default is "Close Price".
+            samples (int, default 1): The number of samples to generate. Default is 1.
         """
 
         if not 1 < steps_forward < 255 or not isinstance(steps_forward, int):
@@ -239,12 +241,13 @@ class Asset:
         Get data for plotting.
 
         Parameters:
-            column (AvailableRawColumns): The column of historical data to plot.
-            Default is "Close Price".
-            sampling (NDArray): An array of samples for plotting. Default is None.
+            column (AvailableRawColumns. default "Close Price"): The column of
+                historical data to plot. Default is "Close Price".
+            sampling (NDArray, optional, default None): An array of samples for
+                plotting. Default is None.
 
         Returns:
-            tuple: A tuple containing data for plotting.
+            (tuple): A tuple containing data for plotting.
         """
         return (
             self.dates() if sampling is None else np.arange(0, sampling.shape[1]),
