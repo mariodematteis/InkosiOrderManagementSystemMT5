@@ -1,5 +1,3 @@
-from inkosi.
-
 def html_generator(
     template_name: str,
     **kwargs,

@@ -4,9 +4,8 @@ from dataclasses import asdict
 from beartype import beartype
 
 from inkosi.database.mongodb.models import Log
+from inkosi.log.models import LogType
 from inkosi.utils.settings import get_mongodb_collection
-
-from .models import LogType
 
 
 class Logger:
@@ -19,8 +18,38 @@ class Logger:
         **kwargs,
     ) -> None:
         """
-        _summary_
+        Initialize a custom logger instance.
+
+        Parameters:
+            module_name (str): The name of the module for which the logger is created.
+            log_filename (str | None, optional): The filename for the log file. Defaults
+            to "master.log".
+            level (int, optional): The logging level. Defaults to logging.DEBUG.
+            formatter (str, optional): The log message format. Defaults to
+            "[%(asctime)s\t %(levelname)s\t %(name)s] %(message)s".
+            **kwargs: Additional keyword arguments.
+
+        Attributes:
+            module_name (str): The name of the module for which the logger is created.
+            package_name (str | None): The name of the package if provided; otherwise,
+            None.
+            name (str): The logger name, including the package name if available.
+            formatter (str): The log message format.
+            logger (logging.Logger): The main logger instance.
+            file_handler (logging.FileHandler | None): The file handler for writing
+            logs to a file if log_filename is provided.
+            stream_handler (logging.StreamHandler): The stream handler for writing logs
+            to the console.
+            mongo_manager: The MongoDB manager instance if database information is
+            provided; otherwise, None.
+
+        Note:
+            This method initializes a custom logger instance for logging messages. It
+            supports logging to both a file (if log_filename is provided) and the
+            console. Additionally, it can initialize a MongoDB manager instance if
+            database information is provided in the keyword arguments.
         """
+
         self.module_name = module_name
         self.package_name = None
 
@@ -90,6 +119,17 @@ class Logger:
         self,
         message: str,
     ) -> None:
+        """
+        Log a critical-level message and register it to the MongoDB database if
+        available.
+
+        Parameters:
+            message (str): The message to be logged.
+
+        Returns:
+            None
+        """
+
         self.logger.critical(
             msg=message,
         )
@@ -103,6 +143,16 @@ class Logger:
         self,
         message: str,
     ) -> None:
+        """
+        Log a debug-level message and register it to the MongoDB database if available.
+
+        Parameters:
+            message (str): The message to be logged.
+
+        Returns:
+            None
+        """
+
         self.logger.debug(
             msg=message,
         )
@@ -116,6 +166,16 @@ class Logger:
         self,
         message: str,
     ) -> None:
+        """
+        Log an error-level message and register it to the MongoDB database if available.
+
+        Parameters:
+            message (str): The message to be logged.
+
+        Returns:
+            None
+        """
+
         self.logger.error(
             msg=message,
         )
@@ -129,6 +189,16 @@ class Logger:
         self,
         message: str,
     ) -> None:
+        """
+        Log an info-level message and register it to the MongoDB database if available.
+
+        Parameters:
+            message (str): The message to be logged.
+
+        Returns:
+            None
+        """
+
         self.logger.info(
             msg=message,
         )
@@ -142,6 +212,17 @@ class Logger:
         self,
         message: str,
     ) -> None:
+        """
+        Log a warning-level message and register it to the MongoDB database if
+        available.
+
+        Parameters:
+            message (str): The message to be logged.
+
+        Returns:
+            None
+        """
+
         self.logger.warning(
             msg=message,
         )
@@ -157,6 +238,17 @@ class Logger:
         log_type: LogType,
         message: str,
     ) -> None:
+        """
+        Register a log entry to the MongoDB database if available.
+
+        Parameters:
+            log_type (LogType): The log type.
+            message (str): The log message.
+
+        Returns:
+            None
+        """
+
         if not self.mongo_manager:
             return
 

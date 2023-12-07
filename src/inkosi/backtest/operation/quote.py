@@ -18,11 +18,33 @@ class QuoteMetaclass(type):
 
 
 class Quote(metaclass=QuoteMetaclass):
+    """
+    Singleton class for downloading financial instrument quotes using the Yahoo Finance
+    API.
+
+    Attributes:
+        period (str): The time period for historical data. Default is "1y" (1 year).
+        time_frame (str): The time frame for data intervals. Default is "1d" (1 day).
+        logger (Logger): Logger instance for logging messages.
+        financial_instruments (dict): A dictionary to store downloaded financial
+        instrument quotes.
+    """
+
     def __init__(
         self,
         period="1y",
         time_frame="1d",
     ):
+        """
+        Initializes a Quote instance.
+
+        Parameters:
+            period (str): The time period for historical data.
+            Default is "1y" (1 year).
+            time_frame (str): The time frame for data intervals.
+            Default is "1d" (1 day).
+        """
+
         self.period = period
         self.time_frame = time_frame
 
@@ -36,6 +58,20 @@ class Quote(metaclass=QuoteMetaclass):
         start: date | None = None,
         end: date | None = None,
     ) -> dict[str, list] | None:
+        """
+        Download financial instrument quotes using the Yahoo Finance API.
+
+        Parameters:
+            ticker (str): The symbol of the financial instrument.
+            start (date): The start date for historical data. Default is None.
+            end (date): The end date for historical data. Default is None.
+
+        Returns:
+            dict[str, list] or None: A dictionary containing financial instrument
+            quotes (Dates, Open, High, Low, Close, Returns) or None if the download
+            fails.
+        """
+
         quote = yf.Ticker(ticker)
 
         try:
@@ -72,4 +108,11 @@ class Quote(metaclass=QuoteMetaclass):
         }
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the financial instruments stored in the Quote
+        instance.
+
+        Returns:
+            str: A string representation of the financial instruments.
+        """
         return str(self.financial_instruments)

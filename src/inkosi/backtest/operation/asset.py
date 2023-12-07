@@ -9,6 +9,19 @@ from inkosi.backtest.operation.schemas import AvailableRawColumns, SamplingMetho
 
 
 class Asset:
+    """
+    Represents a financial asset and provides methods for data analysis and
+    visualization.
+
+    Attributes:
+        asset_name (str): The name of the financial asset.
+        period (str): The time period for historical data. Default is "1y" (1 year).
+        time_frame (str): The time frame for data intervals. Default is "1d" (1 day).
+        quote (Quote): An instance of the Quote class for downloading financial
+        instrument quotes.
+        result (dict): The result of downloading financial instrument quotes.
+    """
+
     def __init__(
         self,
         asset_name: str,
@@ -17,6 +30,19 @@ class Asset:
         start: date | None = None,
         end: date | None = None,
     ):
+        """
+        Initializes an Asset instance.
+
+        Parameters:
+            asset_name (str): The name of the financial asset.
+            period (str): The time period for historical data.
+            Default is "1y" (1 year).
+            time_frame (str): The time frame for data intervals.
+            Default is "1d" (1 day).
+            start (date): The start date for historical data. Default is None.
+            end (date): The end date for historical data. Default is None.
+        """
+
         self.asset_name = asset_name
         self.period = period
         self.time_frame = time_frame
@@ -35,6 +61,17 @@ class Asset:
         column: str = AvailableRawColumns.CLOSE_PRICE,
         samples: int = 1,
     ) -> NDArray | None:
+        """
+        Generate samples based on historical data.
+
+        Parameters:
+            sampling_method (SamplingMethods): The method used for generating samples.
+            steps_forward (int): The number of steps forward in time for each sample.
+            column (str): The column of historical data to use for sampling. Default is
+            "Close Price".
+            samples (int): The number of samples to generate. Default is 1.
+        """
+
         if not 1 < steps_forward < 255 or not isinstance(steps_forward, int):
             return None
 
@@ -121,27 +158,76 @@ class Asset:
                 return None
 
     def dates(self) -> NDArray:
+        """
+        Get the dates associated with the historical data.
+
+        Returns:
+            NDArray: An array of dates.
+        """
+
         return self.result.get(AvailableRawColumns.DATES, [])
 
     def open_prices(self) -> NDArray:
+        """
+        Get the open prices from the historical data.
+
+        Returns:
+            NDArray: An array of open prices.
+        """
         return self.result.get(AvailableRawColumns.OPEN_PRICE, [])
 
     def high_prices(self) -> NDArray:
+        """
+        Get the high prices from the historical data.
+
+        Returns:
+            NDArray: An array of high prices.
+        """
         return self.result.get(AvailableRawColumns.HIGH_PRICE, [])
 
     def low_prices(self) -> NDArray:
+        """
+        Get the low prices from the historical data.
+
+        Returns:
+            NDArray: An array of low prices.
+        """
         return self.result.get(AvailableRawColumns.LOW_PRICE, [])
 
     def close_prices(self) -> NDArray:
+        """
+        Get the close prices from the historical data.
+
+        Returns:
+            NDArray: An array of close prices.
+        """
         return self.result.get(AvailableRawColumns.CLOSE_PRICE, [])
 
     def returns(self) -> NDArray:
+        """
+        Get the returns from the historical data.
+
+        Returns:
+            NDArray: An array of returns.
+        """
         return self.result.get(AvailableRawColumns.RETURNS, [])
 
     def return_distribution(self) -> NDArray:
+        """
+        Get the sorted returns from the historical data.
+
+        Returns:
+            NDArray: An array of sorted returns.
+        """
         return np.sort(self.result.get(AvailableRawColumns.RETURNS, []))
 
     def data_frame(self) -> pd.DataFrame:
+        """
+        Convert historical data to a pandas DataFrame.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing historical data.
+        """
         return pd.DataFrame(self.result)
 
     def plotting(
@@ -149,6 +235,17 @@ class Asset:
         column: AvailableRawColumns = AvailableRawColumns.CLOSE_PRICE,
         sampling: NDArray | None = None,
     ) -> tuple:
+        """
+        Get data for plotting.
+
+        Parameters:
+            column (AvailableRawColumns): The column of historical data to plot.
+            Default is "Close Price".
+            sampling (NDArray): An array of samples for plotting. Default is None.
+
+        Returns:
+            tuple: A tuple containing data for plotting.
+        """
         return (
             self.dates() if sampling is None else np.arange(0, sampling.shape[1]),
             self.result.get(column).reshape(1, self.result.get(column).shape[0])

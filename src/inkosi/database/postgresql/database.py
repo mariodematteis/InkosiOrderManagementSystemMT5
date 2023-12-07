@@ -12,19 +12,7 @@ from sqlalchemy.schema import CreateSchema
 from sqlalchemy_utils import create_database, database_exists
 
 from inkosi.app.schemas import Mode
-from inkosi.log.log import Logger
-from inkosi.utils.exceptions import PostgreSQLConnectionError
-from inkosi.utils.settings import (
-    get_administrators_policies,
-    get_investors_policies,
-    get_ip_address_correspondence,
-    get_postgresql_schema,
-    get_postgresql_url,
-    get_time_activity,
-)
-from inkosi.utils.utils import AdministratorPolicies
-
-from .schemas import (
+from inkosi.database.postgresql.schemas import (
     AdministratorProfile,
     ATSProfile,
     AuthenticationOutput,
@@ -37,15 +25,41 @@ from .schemas import (
     User,
     UserRole,
 )
+from inkosi.log.log import Logger
+from inkosi.utils.exceptions import PostgreSQLConnectionError
+from inkosi.utils.settings import (
+    get_administrators_policies,
+    get_investors_policies,
+    get_ip_address_correspondence,
+    get_postgresql_schema,
+    get_postgresql_url,
+    get_time_activity,
+)
+from inkosi.utils.utils import AdministratorPolicies
 
 logger = Logger(
-    module_name="PostgreSQLDatabase", package_name="postgresql", database=False
+    module_name="PostgreSQLDatabase",
+    package_name="postgresql",
+    database=False,
 )
 
 
-class DatabaseInstanceSingleton(
-    type,
-):
+class DatabaseInstanceSingleton(type):
+    """
+    Metaclass implementing the Singleton pattern for a database instance.
+
+    Attributes:
+        _instance: The singleton instance of the class.
+
+    Methods:
+        __call__(cls, *args, **kwargs):
+            Override the call method to implement the Singleton pattern.
+
+    Note:
+        This metaclass ensures that only one instance of the class is created,
+        following the Singleton pattern.
+    """
+
     _instance = None
 
     def __call__(
@@ -53,6 +67,18 @@ class DatabaseInstanceSingleton(
         *args,
         **kwargs,
     ):
+        """
+        Override the call method to implement the Singleton pattern.
+
+        Parameters:
+            cls: The class.
+            *args: Variable arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            The singleton instance of the class.
+        """
+
         if not cls._instance:
             cls._instance = super(
                 type(
@@ -68,9 +94,41 @@ class DatabaseInstanceSingleton(
 
 
 class PostgreSQLInstance(metaclass=DatabaseInstanceSingleton):
+    """
+    Singleton class representing a PostgreSQL database instance.
+
+    Attributes:
+        engine (Engine): The SQLAlchemy database engine.
+        metadata (MetaData): The SQLAlchemy metadata object.
+        base (declarative_base): The SQLAlchemy declarative base.
+
+    Methods:
+        __init__(self): Initialize the PostgreSQL instance.
+        connect(self): Connect to the PostgreSQL instance.
+        add(self, model: Iterable[declarative_base()] | declarative_base()) -> bool:
+            Add records to the database.
+        select(self, query: TextClause | str) -> list[Any]:
+            Execute a select query on the database.
+        update(self, query: TextClause | str) -> bool:
+            Execute an update query on the database.
+
+    Note:
+        This class represents a singleton PostgreSQL database instance. It provides
+        methods for connecting to the database, adding records, executing select
+        queries, and executing update queries.
+    """
+
     def __init__(
         self,
     ) -> None:
+        """
+        Initialize the PostgreSQL instance.
+
+        Raises:
+            PostgreSQLConnectionError: If unable to establish a connection with the
+            PostgreSQL instance.
+        """
+
         self.engine: Engine = create_engine(
             get_postgresql_url(),
         )
@@ -95,6 +153,14 @@ class PostgreSQLInstance(metaclass=DatabaseInstanceSingleton):
     def connect(
         self,
     ) -> None:
+        """
+        Connect to the PostgreSQL instance.
+
+        Raises:
+            PostgreSQLConnectionError: If unable to establish a connection with the
+            PostgreSQL instance.
+        """
+
         try:
             self.base.metadata.create_all(bind=self.engine)
         except Exception:
@@ -106,6 +172,17 @@ class PostgreSQLInstance(metaclass=DatabaseInstanceSingleton):
         self,
         model: Iterable[declarative_base()] | declarative_base(),
     ) -> bool:
+        """
+        Add records to the database.
+
+        Parameters:
+            model (Iterable[declarative_base()] | declarative_base()): The model or
+            iterable of models to add.
+
+        Returns:
+            bool: True if the addition is successful, False otherwise.
+        """
+
         __session = sessionmaker(bind=self.engine)
         with __session() as session:
             try:
@@ -140,6 +217,16 @@ class PostgreSQLInstance(metaclass=DatabaseInstanceSingleton):
         self,
         query: TextClause | str,
     ) -> list[Any]:
+        """
+        Execute a select query on the database.
+
+        Parameters:
+            query (TextClause | str): The select query.
+
+        Returns:
+            list[Any]: The result of the select query.
+        """
+
         __session = sessionmaker(bind=self.engine)
         with __session() as session:
             __query = session.execute(
@@ -155,6 +242,16 @@ class PostgreSQLInstance(metaclass=DatabaseInstanceSingleton):
         self,
         query: TextClause | str,
     ) -> bool:
+        """
+        Execute an update query on the database.
+
+        Parameters:
+            query (TextClause | str): The update query.
+
+        Returns:
+            bool: True if the update is successful, False otherwise.
+        """
+
         __session = sessionmaker(bind=self.engine)
         with __session() as session:
             try:

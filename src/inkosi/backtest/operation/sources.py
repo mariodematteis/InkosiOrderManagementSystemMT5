@@ -7,12 +7,45 @@ from inkosi.database.postgresql.database import PostgreSQLInstance
 
 
 class Dataset:
+    """
+    A class for loading datasets from various sources.
+
+    Parameters:
+        source (str or Asset): The data source, which can be a string representing a SQL
+        table, a file path for CSV, HDF, or Parquet,
+        or an Asset object for custom data.
+        source_type (SourceType): The type of the data source.
+        **kwargs: Additional keyword arguments passed to the specific data loading
+        function.
+
+    Attributes:
+        postgres_instance (PostgreSQLInstance): An instance of PostgreSQLInstance used
+        for SQL data loading.
+        dataset (pd.DataFrame): The loaded dataset as a Pandas DataFrame.
+        np_dataset (NDArray): The dataset converted to a NumPy array.
+
+    Methods:
+        get_dataset(): Returns the NumPy array representation of the loaded dataset.
+    """
+
     def __init__(
         self,
         source: str | Asset,
         source_type: SourceType,
         **kwargs,
     ) -> None:
+        """
+        Constructor for the Dataset class.
+
+        Parameters:
+            source (str or Asset): The data source, which can be a string representing a
+            SQL table, a file path for CSV, HDF, or Parquet, or an Asset object for
+            custom data.
+            source_type (SourceType): The type of the data source.
+            **kwargs: Additional keyword arguments passed to the specific data loading
+            function.
+        """
+
         self.postgres_instance = PostgreSQLInstance()
 
         if isinstance(source, str) or isinstance(source, Asset):
@@ -55,4 +88,12 @@ class Dataset:
     def get_dataset(
         self,
     ) -> NDArray | None:
+        """
+        Returns the NumPy array representation of the loaded dataset.
+
+        Returns:
+            NDArray or None: The NumPy array representing the dataset or None if the
+            dataset is not loaded.
+        """
+
         return self.np_dataset

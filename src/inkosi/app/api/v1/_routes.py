@@ -1,17 +1,26 @@
 from fastapi import APIRouter, Depends
 
 from inkosi.app import _constants
+from inkosi.app.api.v1.endpoints.admin.administration import (
+    router as administration_router,
+)
+from inkosi.app.api.v1.endpoints.admin.operations import router as operations_router
+from inkosi.app.api.v1.endpoints.admin.scheduler import router as scheduler_router
+from inkosi.app.api.v1.endpoints.admin.trades.database import (
+    router as database_trading_router,
+)
+from inkosi.app.api.v1.endpoints.admin.trades.trading import router as trading_router
+from inkosi.app.api.v1.endpoints.investor.administration import (
+    router as investor_administration_router,
+)
+from inkosi.app.api.v1.endpoints.investor.backtest import (
+    router as investor_backtest_router,
+)
+from inkosi.app.api.v1.endpoints.investor.operations import (
+    router as investor_operations_router,
+)
+from inkosi.app.api.v1.endpoints.profile import router as profile_router
 from inkosi.app.dependencies import authentication, network_policies_check
-
-from .endpoints.admin.administration import router as administration_router
-from .endpoints.admin.operations import router as operations_router
-from .endpoints.admin.scheduler import router as scheduler_router
-from .endpoints.admin.trades.database import router as database_trading_router
-from .endpoints.admin.trades.trading import router as trading_router
-from .endpoints.investor.administration import router as investor_administration_router
-from .endpoints.investor.backtest import router as investor_backtest_router
-from .endpoints.investor.operations import router as investor_operations_router
-from .endpoints.profile import router as profile_router
 
 v1_router = APIRouter()
 

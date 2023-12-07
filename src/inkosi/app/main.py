@@ -174,10 +174,8 @@ async def healthcheck() -> str:
     """
     Get the healthcheck of the application
 
-    Returns
-    -------
-    str
-        A message to ensure that the application is active
+    Returns:
+        str: A message to ensure that the application is active
     """
 
     return _API_HEALTHCHECK
@@ -193,10 +191,9 @@ async def status() -> dict[str, str]:
     """
     Get the status of the application
 
-    Returns
-    -------
-    dict[str, str]
-        A dictionary containing metadata about the status of the application
+    Returns:
+        dict[str, str]: A dictionary containing metadata about the status of the
+        application
     """
 
     return {
