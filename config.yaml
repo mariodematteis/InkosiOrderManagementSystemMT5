@@ -1,26 +1,26 @@
 PostgreSQL:
-  PROTOCOL: "postgresql"
-  USERNAME: "postgres"
-  PASSWORD: "postgres"
-  HOSTNAME: "localhost"
+  PROTOCOL: postgresql
+  USERNAME: fabrizio_iozzi
+  PASSWORD: "p8AHf,5K{b1'}OlV"
+  HOSTNAME: 34.28.220.35
   PORT: 5432
-  DATABASE: "Inkosi"
-  SCHEMA: "development"
+  DATABASE: Inkosi
+  SCHEMA: development
   PARAMETERS: ""
 
 MongoDB:
-  PROTOCOL: mongodb
-  USERNAME: test
-  PASSWORD: test
-  HOSTNAME: localhost
+  PROTOCOL: mongodb+srv
+  USERNAME: mongodb
+  PASSWORD: 4SfgTMaSen4i81vI
+  HOSTNAME: exam.9yilgpl.mongodb.net
   PORT: 27017
   DATABASE: production
   PARAMETERS: ""
   TLS: false
 
   COLLECTIONS:
-    Log: "Logs"
-    Trade: "Trades"
+    Log: Logs
+    Trade: Trades
 
 API:
   AllowedIPAddresses: "*"
@@ -54,7 +54,17 @@ DefaultAdministrators:
   1234:
     first_name: Mario Nicolò
     second_name: De Matteis
-    email_address: test@test.it
+    email_address: marionicdematteis@admin.it
+    birthday: 1900-01-01
+    fiscal_code: test
+    password: test
+    policies:
+      - ADMINISTRATOR_IFM_FULL_ACCESS
+    active: True
+  5678:
+    first_name: Fabrizio
+    second_name: Iozzi
+    email_address: fabrizioiozzi@admin.it
     birthday: 1900-01-01
     fiscal_code: test
     password: test
@@ -65,7 +75,18 @@ DefaultAdministrators:
 DefaultInvestors:
   - first_name: Mario Nicolò
     second_name: De Matteis
-    email_address: test@test.it
+    email_address: marionicdematteis@investor.it
+    birthday: 1900-01-01
+    fiscal_code: test
+    password: test
+    policies:
+      - INVESTOR_DASHBOARD_VISUALISATION
+      - INVESTOR_SAMPLING_SCENARIOS
+      - INVESTOR_BACKTEST_ALL
+    active: True
+  - first_name: Fabrizio
+    second_name: Iozzi
+    email_address: fabrizioiozzi@investor.it
     birthday: 1900-01-01
     fiscal_code: test
     password: test
@@ -76,9 +97,17 @@ DefaultInvestors:
     active: True
 
 DefaultFunds:
-  DEMO:
+  DEMO1:
     administrators:
       - 1234
+    commission_type: percentual
+    commission_value: 0
+    risk_limits: False
+    raising_funds: True
+
+  DEMO2:
+    administrators:
+      - 5678
     commission_type: percentual
     commission_value: 0
     risk_limits: False
@@ -88,11 +117,12 @@ DefaultStrategies:
   - id: TERMINAL
     administrator_id: 1234
     fund_names:
-      - DEMO
+      - DEMO1
     category: GENERAL_PURPOSE
   - id: API
+    administrator_id: 5678
     fund_names:
-      - DEMO
+      - DEMO2
     category: GENERAL_PURPOSE
 
 Backtesting:
