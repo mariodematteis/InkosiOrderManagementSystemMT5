@@ -8,7 +8,6 @@ from pymongo.database import Database
 
 from inkosi.database.mongodb.schemas import TradeRequest
 from inkosi.log.log import Logger
-from inkosi.utils.exceptions import MongoConnectionError
 from inkosi.utils.settings import (
     get_mongodb_collection,
     get_mongodb_settings,
@@ -78,21 +77,30 @@ class MongoDBInstance(metaclass=DatabaseInstanceSingleton):
         try:
             if get_mongodb_settings().TLS:
                 self.client = MongoClient(
-                    get_mongodb_url(),
+                    get_mongodb_url(
+                        True if "srv" in get_mongodb_settings().PROTOCOL else False
+                    ),
                     tlsCAFile=certifi.where(),
                 )
             else:
                 self.client = MongoClient(
-                    get_mongodb_url(),
+                    get_mongodb_url(
+                        True if "srv" in get_mongodb_settings().PROTOCOL else False
+                    ),
                 )
 
             self.client.admin.command(
                 "ping",
             )
             self.database = self.client[get_mongodb_settings().DATABASE]
-        except Exception:
-            logger.error(message="Unable to establish with the MongoDB Instance")
-            raise MongoConnectionError
+        except Exception as error:
+            logger.error(
+                message=(
+                    "Unable to establish with the MongoDB Instance. Error occurred:"
+                    f" {error}"
+                )
+            )
+            return
 
     def is_connected(
         self,
