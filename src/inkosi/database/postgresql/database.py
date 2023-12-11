@@ -334,8 +334,6 @@ class PostgreSQLCrud:
             for row in self.postgresql_instance.select(query=__query)
         ]
 
-        print(result, __query)
-
         match len(result):
             case 1:
                 row = result[0]

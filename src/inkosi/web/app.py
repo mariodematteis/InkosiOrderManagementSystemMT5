@@ -558,7 +558,6 @@ if state:
 
             if request.status_code == status.HTTP_200_OK:
                 results = request.json()
-                print(results)
             else:
                 st.error(
                     "Unable to correctly deposit funds",
@@ -614,37 +613,16 @@ if state:
                     icon="🚨",
                 )
 
-    if (
-        st.session_state.get("role", UserRole.INVESTOR) == UserRole.ADMINISTRATOR
-        and not fund_information.raising_funds
-    ):
-        close_position = st.sidebar.expander(label="Close Position")
-        close_position_form = close_position.form(
-            key="Close Position Form",
-            clear_on_submit=True,
-        )
-        position_selection = close_position_form.selectbox(
-            label="Position Selection",
-            options=get_trading_tickers(),
-            placeholder="Select Position",
-            label_visibility="hidden",
-        )
-        if close_position_form.form_submit_button(
-            "Close Position",
-            use_container_width=True,
-        ):
-            st.info(
-                body="Still defining the feature",
-                icon="🤖",
-            )
-
     if st.sidebar.button(
         "Backtesting Platform",
         use_container_width=True,
     ):
         open_page(f"http://localhost:8502/?token={st.session_state.get('token', '-')}")
 
-    if fund_information.raising_funds:
+    if (
+        st.session_state.get("role", UserRole.INVESTOR) == UserRole.INVESTOR
+        and fund_information.raising_funds
+    ):
         deposit_expander = st.sidebar.expander(label="Deposit Fund")
         deposit: float = deposit_expander.number_input(
             label="Deposit fund",

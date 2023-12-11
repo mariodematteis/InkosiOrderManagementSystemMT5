@@ -161,7 +161,7 @@ async def startup_event() -> None:
     event_type="shutdown",
 )
 async def shutdown() -> None:
-    RiskManagement().unload_model()
+    RiskManagement().unload_models()
 
 
 @app.get(
