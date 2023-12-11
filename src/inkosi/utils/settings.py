@@ -273,6 +273,7 @@ class Settings:
         TradingTickers (list): List of trading tickers.
 
     Optional Attributes:
+        TradingRiskManagement (TradingRiskManagement): Default Risk Management Values
         DefaultAdministrators (dict): Default administrators' information.
         DefaultInvestors (list): Default investors' information.
         DefaultFunds (dict): Default funds' information.
@@ -287,9 +288,7 @@ class Settings:
     TechnicalIndicators: TechnicalIndicators
     Backtesting: Backtesting
     TradingTickers: list
-    TradingRiskManagement: TradingRiskManagement | None = field(
-        default_factory=TradingRiskManagement
-    )
+    TradingRiskManagement: TradingRiskManagement
 
     DefaultAdministrators: dict[int, dict[str, str | date | list | None]] = field(
         default_factory=dict
