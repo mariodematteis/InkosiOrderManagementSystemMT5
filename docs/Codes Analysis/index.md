@@ -2,6 +2,8 @@
 
 ## Introduction
 
+## Authentication
+
 ## Modules
 
 - API
