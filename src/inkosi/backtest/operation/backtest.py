@@ -38,12 +38,6 @@ def technical_column(
     if AvailableRawColumns.has(column_type):
         return data_frame[column_type]
 
-    print(
-        additional_information.get(
-            Elements.PERIOD,
-        )
-    )
-
     match column_type:
         case AvailableTechincalIndicators.SMA:
             return data_frame.ta.sma(
@@ -95,9 +89,6 @@ def filter_dataset(
             column_type=second_element.get(Elements.ELEMENT),
             additional_information=second_element,
         )
-
-        print(first_column)
-        print(second_column)
 
         match relation:
             case Relation.GREATER:
@@ -204,8 +195,6 @@ def backtest(request: BacktestRequest) -> list[BacktestRecord] | None:
             take_profit,
             stop_loss,
         )
-
-        print(entry_point_index, entry_point_price, result_up, result_down)
 
         if result_up is None or result_down is None:
             continue

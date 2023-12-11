@@ -253,6 +253,7 @@ class TradingRiskManagement:
         StopLoss (int | float): Value indicating the stop loss
     """
 
+    Volume: int | float = field(default=0.0)
     TakeProfit: int | float = field(default=0.0)
     StopLoss: int | float = field(default=0.0)
 
@@ -287,7 +288,7 @@ class Settings:
     TechnicalIndicators: TechnicalIndicators
     Backtesting: Backtesting
     TradingTickers: list
-    TradingRiskManagement: TradingRiskManagement | None = field(
+    TradingRiskManagement: TradingRiskManagement = field(
         default_factory=TradingRiskManagement
     )
 
@@ -313,7 +314,7 @@ def get_environmental_settings() -> EnvSettings:
 
     Returns:
         EnvSettings: An instance of the EnvSettings class representing
-        the environmental configuration settings.
+            the environmental configuration settings.
 
     Note:
         This function is decorated with the LRU (Least Recently Used) cache,
@@ -330,7 +331,7 @@ def get_settings() -> Settings:
 
     Returns:
         Settings: An instance of the Settings class representing the overall
-        configuration settings for the application.
+            configuration settings for the application.
     """
 
     settings_import = OmegaConf.load(
@@ -353,7 +354,7 @@ def get_postgresql_settings() -> PostgreSQL:
 
     Returns:
         PostgreSQL: An instance of the PostgreSQL class representing the overall
-        configuration settings for the PostgreSQL Instance.
+            configuration settings for the PostgreSQL Instance.
     """
 
     return get_settings().PostgreSQL
@@ -417,7 +418,7 @@ def get_mongodb_settings() -> MongoDB:
 
     Returns:
         MongoDB: An instance of the MongoDB configuration settings obtained from the
-        overall application settings.
+            overall application settings.
 
     Note:
         This function is decorated with the LRU (Least Recently Used) cache,
@@ -434,7 +435,7 @@ def get_mongodb_collection() -> MongoDBCollections:
 
     Returns:
         MongoDBCollections: An instance of the MongoDBCollections class representing
-        the MongoDB collection.
+            the MongoDB collection.
     """
 
     return get_mongodb_settings().COLLECTIONS
@@ -479,7 +480,7 @@ def get_api_settings() -> API:
 
     Returns:
         API: An instance of the API configuration settings obtained from the overall
-        application settings.
+            application settings.
 
     Note:
         This function is decorated with the LRU (Least Recently Used) cache,
@@ -501,7 +502,7 @@ def get_allowed_ip_addresses() -> list | str:
 
     Returns:
         list | str: A list of allowed IP addresses or a string specifying IP address
-        correspondence, obtained from the API configuration.
+            correspondence, obtained from the API configuration.
 
     Note:
         This function is decorated with the LRU (Least Recently Used) cache,
@@ -545,7 +546,7 @@ def get_time_activity() -> dict:
 
     Returns:
         dict: A dictionary containing time activity configuration obtained from the API
-        settings.
+            settings.
 
     Note:
         This function is decorated with the LRU (Least Recently Used) cache,
@@ -567,7 +568,7 @@ def get_administrators_policies() -> list:
 
     Returns:
         list: A list of policies for administrators obtained from the overall
-        application settings.
+            application settings.
 
     Note:
         This function is decorated with the LRU (Least Recently Used) cache,
@@ -589,7 +590,7 @@ def get_investors_policies() -> list:
 
     Returns:
         list: A list of policies for investors obtained from the overall application
-        settings.
+            settings.
 
     Note:
         This function is decorated with the LRU (Least Recently Used) cache,
@@ -611,7 +612,7 @@ def get_risk_management() -> RiskManagement:
 
     Returns:
         RiskManagement: An instance of the risk management configuration settings
-        obtained from the overall application settings.
+            obtained from the overall application settings.
 
     Note:
         This function is decorated with the LRU (Least Recently Used) cache,
@@ -633,7 +634,7 @@ def get_risk_management_models() -> list | None:
 
     Returns:
         list | None: A list of risk management models obtained from the overall
-        application settings, or None if no models are specified.
+            application settings, or None if no models are specified.
 
     Note:
         This function is decorated with the LRU (Least Recently Used) cache,
@@ -655,7 +656,7 @@ def get_technical_indicators_values() -> TechnicalIndicators:
 
     Returns:
         TechnicalIndicators: An instance of the technical indicators configuration
-        settings obtained from the overall application settings.
+            settings obtained from the overall application settings.
 
     Note:
         This function is decorated with the LRU (Least Recently Used) cache,
@@ -677,13 +678,14 @@ def get_default_administrators() -> dict[int, dict[str, str | date | list | None
 
     Returns:
         dict[int, dict[str, Union[str, date, list, None]]]: A dictionary containing
-        default administrators. The keys are integers representing administrator IDs,
-        and the values are dictionaries with keys representing administrator attributes.
-        Possible attributes include:
-        - 'name' (str): The name of the administrator.
-        - 'birth_date' (date): The birth date of the administrator.
-        - 'permissions' (list): A list of permissions granted to the administrator.
-        - Other custom attributes, which may be None.
+            default administrators. The keys are integers representing administrator
+            IDs, and the values are dictionaries with keys representing administrator
+            attributes.
+            Possible attributes include:
+            - 'name' (str): The name of the administrator.
+            - 'birth_date' (date): The birth date of the administrator.
+            - 'permissions' (list): A list of permissions granted to the administrator.
+            - Other custom attributes, which may be None.
     """
 
     return get_settings().DefaultAdministrators
@@ -696,12 +698,12 @@ def get_default_investors() -> list[dict[str, str | date | list | None]]:
 
     Returns:
         list[dict[str, Union[str, date, list, None]]]: A list of dictionaries
-        representing default investors. Each dictionary contains keys representing
-        investor attributes. Possible attributes include:
-        - 'name' (str): The name of the investor.
-        - 'birth_date' (date): The birth date of the investor.
-        - 'investments' (list): A list of investments made by the investor.
-        - Other custom attributes, which may be None.
+            representing default investors. Each dictionary contains keys representing
+            investor attributes. Possible attributes include:
+            - 'name' (str): The name of the investor.
+            - 'birth_date' (date): The birth date of the investor.
+            - 'investments' (list): A list of investments made by the investor.
+            - Other custom attributes, which may be None.
     """
 
     return get_settings().DefaultInvestors
@@ -733,12 +735,12 @@ def get_default_strategies() -> list[dict[str, str | date | list | None]]:
 
     Returns:
         list[dict[str, Union[str, date, List, None]]]: A list of dictionaries
-        representing default strategies. Each dictionary contains keys representing
-        strategy attributes. Possible attributes include:
-        - 'name' (str): The name of the strategy.
-        - 'start_date' (date): The start date of the strategy.
-        - 'indicators' (list): A list of indicators used in the strategy.
-        - Other custom attributes, which may be None.
+            representing default strategies. Each dictionary contains keys representing
+            strategy attributes. Possible attributes include:
+            - 'name' (str): The name of the strategy.
+            - 'start_date' (date): The start date of the strategy.
+            - 'indicators' (list): A list of indicators used in the strategy.
+            - Other custom attributes, which may be None.
     """
 
     return get_settings().DefaultStrategies
@@ -751,7 +753,7 @@ def get_backtesting_settings() -> Backtesting:
 
     Returns:
         Backtesting: An instance of the Backtesting class containing backtesting
-        configuration.
+            configuration.
     """
 
     return get_settings().Backtesting
@@ -779,3 +781,15 @@ def get_trading_tickers() -> list[str]:
     """
 
     return get_settings().TradingTickers
+
+
+@lru_cache
+def get_trading_risk_management_settings() -> TradingRiskManagement:
+    """
+    Retrieve the trading risk management settings for live trading.
+
+    Returns:
+        TradingRiskManagement: A class containing default information relatively to
+    """
+
+    return get_settings().TradingRiskManagement

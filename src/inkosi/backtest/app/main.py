@@ -131,7 +131,6 @@ def add_new_rule_expander(count: int):
             },
             relation=st.session_state.get(relation_key),
         )
-        print(st.session_state["filters"])
 
     if form_rule.form_submit_button("Remove"):
         st.session_state["filters"].pop(count, None)
@@ -398,32 +397,64 @@ else:
 
                 trades = profit_trades + losses_trades + pending_trades
 
+                profitable_ratio_trades: str = (
+                    format(profit_trades / trades, ".2f")
+                    if trades > 0
+                    else "Not Available"
+                )
+
+                profitable_ratio_trades_no_pending_trades: str = (
+                    format(profit_trades / (profit_trades + losses_trades), ".2f")
+                    if (profit_trades + losses_trades) > 0
+                    else "Not Available"
+                )
+
+                pending_ratio_trades: str = (
+                    format(pending_trades / closed_trades, ".2f")
+                    if closed_trades > 0
+                    else "Not Available"
+                )
+
+                if not len(backtest_result):
+                    st.warning(
+                        "It is kindly suggested to edit variables such as date periods,"
+                        " rules, take profit, stop loss, ...\n"
+                    )
+
                 st.title("Backtesting Result")
                 st.markdown(
                     body=f"""
-                <p>Number of Trades <strong>{len(backtest_result)}</strong></p>
-                <p>Chosen Take Profit <strong>{take_profit}</strong></p>
-                <p>Chosen Stop Loss <strong>{stop_loss}</strong></p>
-                <p>Position Type <strong>{position_selected}</strong></p>
-                <p>Profit Trades <strong>{profit_trades}</strong></p>
-                <p>Losses Trades <strong>{losses_trades}</strong></p>
-                <p>Pending Trades <strong>{pending_trades}</strong></p>
-                <p>Profitable Ratio Trades <strong>
-                {format(profit_trades / trades, '.2f')}
-                </strong></p>
-                <p>Profitable Ratio Trades (No Pending Trades) <strong>
-                {format(profit_trades / (profit_trades + losses_trades) , '.2f')}
-                </strong></p>
-                <p>Closed Trades <strong>
-                {closed_trades}</strong></p>
-                <p>Pending Ratio Trades <strong>
-                {pending_trades / closed_trades}</strong></p>
-                """,
+                    <p>Number of Trades <strong>{len(backtest_result)}</strong></p>
+                    <p>Chosen Take Profit <strong>{take_profit}</strong></p>
+                    <p>Chosen Stop Loss <strong>{stop_loss}</strong></p>
+                    <p>Position Type <strong>{position_selected}</strong></p>
+                    <p>Profit Trades <strong>{profit_trades}</strong></p>
+                    <p>Losses Trades <strong>{losses_trades}</strong></p>
+                    <p>Pending Trades <strong>{pending_trades}</strong></p>
+                    <p>Profitable Ratio Trades <strong>
+                    {profitable_ratio_trades}
+                    </strong></p>
+                    <p>Profitable Ratio Trades (No Pending Trades) <strong>
+                    {profitable_ratio_trades_no_pending_trades}
+                    </strong></p>
+                    <p>Closed Trades <strong>
+                    {closed_trades}</strong></p>
+                    <p>Pending Ratio Trades <strong>
+                    {pending_ratio_trades}</strong></p>
+                    """,
                     unsafe_allow_html=True,
                 )
             except Exception as error:
-                print(error)
-                st.error("Unable to correctly conduct backtesting", icon="🚨")
+                logger.error(
+                    f"Unable to correctly perform the backtest. Error occurred: {error}"
+                )
+                st.error(
+                    body=(
+                        "Unable to correctly conduct backtesting. Check log console."
+                        " Please try using new configuration."
+                    ),
+                    icon="🚨",
+                )
 
         if form_rules.form_submit_button(
             "Implement Strategy", use_container_width=True

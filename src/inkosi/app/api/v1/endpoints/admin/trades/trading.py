@@ -50,6 +50,8 @@ async def position_opening(
                 content={
                     "detail": "Unable to open the position",
                     "message": result.detail,
+                    "error": result.error,
+                    "error_code": result.error_code,
                 },
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

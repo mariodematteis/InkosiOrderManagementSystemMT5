@@ -3,7 +3,10 @@ from typing import Any
 import torch
 
 from inkosi.log.log import Logger
-from inkosi.utils.settings import get_risk_management_models
+from inkosi.utils.settings import (
+    get_risk_management_models,
+    get_trading_risk_management_settings,
+)
 
 logger = Logger(module_name="RiskManagement", package_name="portfolio")
 
@@ -133,19 +136,20 @@ class RiskManagement(metaclass=RiskManagementMetaclass):
             logger.critical(
                 "Unable to find the selected the model. No operation will be taken"
             )
-            return
-
-        if not state:
+            self.inference = ()
+        elif not state:
             logger.critical(
                 "No information have been provided relatively to position to open. No"
                 " operation will be taken"
             )
-            return
-
-        self.state = state
-
-        with torch.no_grad():
-            self.inference = self.models_initialised[model](self.state)
+            self.inference = (
+                get_trading_risk_management_settings().Volume,
+                get_trading_risk_management_settings().TakeProfit,
+                get_trading_risk_management_settings().StopLoss,
+            )
+        else:
+            with torch.no_grad():
+                self.inference = self.models_initialised[model](self.state)
 
     def compute_volume(
         self,
@@ -191,15 +195,23 @@ class RiskManagement(metaclass=RiskManagementMetaclass):
 
         return self.inference[2]
 
-    def unload_model(self, model_path: str) -> None:
+    def unload_models(
+        self,
+    ) -> None:
         """
-        Unload the risk management model.
+        Unload the pre-trained risk management models.
 
         Parameters:
-            model_path (str): Path to the risk management model.
+            None
 
         Returns:
             None
         """
 
-        self.models_initialised.pop(model_path)
+        if not hasattr(self, "models_initialised"):
+            return
+
+        [
+            self.models_initialised.pop(model_path)
+            for model_path in self.models_initialised
+        ]

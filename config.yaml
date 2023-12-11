@@ -102,8 +102,9 @@ Backtesting:
 
 TradingTickers:
   - US_500
-  - EURUSD
+  - BTCUSD
 
 TradingRiskManagement:
-  TakeProfit: 20
-  StopLoss: 20
+  Volume: 0.01
+  TakeProfit: 500
+  StopLoss: 500
