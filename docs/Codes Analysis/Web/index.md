@@ -4,12 +4,12 @@
 
 # Exceptions
 
-::: inkosi.utils.exceptions
+:: inkosi.utils.exceptions
 
 # Settings
 
-::: inkosi.utils.settings
+:: inkosi.utils.settings
 
 # Utils
 
-::: inkosi.utils.utils
+:: inkosi.utils.utils

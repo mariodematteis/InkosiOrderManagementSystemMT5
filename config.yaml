@@ -103,3 +103,7 @@ Backtesting:
 TradingTickers:
   - US_500
   - EURUSD
+
+TradingRiskManagement:
+  TakeProfit: 20
+  StopLoss: 20

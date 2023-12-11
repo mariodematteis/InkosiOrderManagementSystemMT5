@@ -113,17 +113,39 @@ class RiskManagement(metaclass=RiskManagementMetaclass):
         take-profit and stop-loss values, and unloading the risk management model.
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        model: str | None = None,
+        state: list | None = None,
+    ) -> None:
         """
         Constructor method for initializing the RiskManagement instance.
 
         Parameters:
-            None
+            model (str, optional): Path to the risk management model.
+            state (list, optional): Information relatively to the current state.
 
         Returns:
             None
         """
-        ...
+
+        if isinstance(model, str) and model not in self.models_initialised:
+            logger.critical(
+                "Unable to find the selected the model. No operation will be taken"
+            )
+            return
+
+        if not state:
+            logger.critical(
+                "No information have been provided relatively to position to open. No"
+                " operation will be taken"
+            )
+            return
+
+        self.state = state
+
+        with torch.no_grad():
+            self.inference = self.models_initialised[model](self.state)
 
     def compute_volume(
         self,
@@ -138,7 +160,7 @@ class RiskManagement(metaclass=RiskManagementMetaclass):
             float: The computed trading volume.
         """
 
-        return 0.1
+        return self.inference[0]
 
     def adjust_take_profit(
         self,
@@ -152,8 +174,7 @@ class RiskManagement(metaclass=RiskManagementMetaclass):
         Returns:
             float: The adjusted take-profit value.
         """
-
-        return 5.0
+        return self.inference[1]
 
     def adjust_stop_loss(
         self,
@@ -168,19 +189,17 @@ class RiskManagement(metaclass=RiskManagementMetaclass):
             float: The adjusted stop-loss value.
         """
 
-        return 5.0
+        return self.inference[2]
 
-    def unload_model(
-        self,
-    ) -> None:
+    def unload_model(self, model_path: str) -> None:
         """
         Unload the risk management model.
 
         Parameters:
-            None
+            model_path (str): Path to the risk management model.
 
         Returns:
             None
         """
 
-        return
+        self.models_initialised.pop(model_path)

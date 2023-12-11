@@ -242,6 +242,22 @@ class Backtesting:
 
 
 @dataclass
+class TradingRiskManagement:
+    """
+    Data class representing backtesting settings.
+    These essentially represents the value used as default when no pre-trained risk
+    management model has been loaded.
+
+    Attributes:
+        TakeProfit (int | float): Value indicating the take profit
+        StopLoss (int | float): Value indicating the stop loss
+    """
+
+    TakeProfit: int | float = field(default=0.0)
+    StopLoss: int | float = field(default=0.0)
+
+
+@dataclass
 class Settings:
     """
     Data class representing system settings.
@@ -271,6 +287,9 @@ class Settings:
     TechnicalIndicators: TechnicalIndicators
     Backtesting: Backtesting
     TradingTickers: list
+    TradingRiskManagement: TradingRiskManagement | None = field(
+        default_factory=TradingRiskManagement
+    )
 
     DefaultAdministrators: dict[int, dict[str, str | date | list | None]] = field(
         default_factory=dict
