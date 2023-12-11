@@ -456,11 +456,6 @@ else:
                     icon="🚨",
                 )
 
-        if form_rules.form_submit_button(
-            "Implement Strategy", use_container_width=True
-        ):
-            st.info("Strategy Correctly Implemented")
-
         form_sampling_method = sampling_tab.form(
             key="Form Sampling Method",
             clear_on_submit=True,
