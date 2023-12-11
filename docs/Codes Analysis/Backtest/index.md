@@ -1,27 +1,25 @@
-# API
+## API
 
-# Introduction
-
-# Schemas
+### _Schemas_
 
 ::: inkosi.backtest.operation.schemas
 
-# Models
+### _Models_
 
 ::: inkosi.backtest.operation.models
 
-# Quote
+### _Quote_
 
 ::: inkosi.backtest.operation.quote
 
-# Asset
+### _Asset_
 
 ::: inkosi.backtest.operation.asset
 
-# Sources
+### _Sources_
 
 ::: inkosi.backtest.operation.sources
 
-# Backtest
+### _Backtest_
 
 ::: inkosi.backtest.operation.backtest

@@ -1,16 +1,10 @@
-# API
+## API
 
-# Introduction
-
-# Schemas
+### _Schemas_
 
 ::: inkosi.api.schemas
 
-# Clients
-
-At the moment...
-
-## MetaTrader 5 (MT5)
+### _MetaTrader 5 (MT5)_
 
 ::: inkosi.api.metatrader
 
