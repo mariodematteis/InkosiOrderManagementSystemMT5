@@ -441,7 +441,7 @@ def get_mongodb_collection() -> MongoDBCollections:
 
 
 @lru_cache
-def get_mongodb_url() -> str:
+def get_mongodb_url(no_port: bool = False) -> str:
     """
     Get the MongoDB connection URL from the configuration settings.
 
@@ -466,8 +466,8 @@ def get_mongodb_url() -> str:
         f"{mongodb_settings.PROTOCOL}://"
         f"{mongodb_settings.USERNAME}:"
         f"{mongodb_settings.PASSWORD}@"
-        f"{mongodb_settings.HOSTNAME}:"
-        f"{mongodb_settings.PORT}/"
+        f"{mongodb_settings.HOSTNAME}"
+        f"{':' + str(mongodb_settings.PORT) if not no_port else ''}/"
         f"{mongodb_settings.PARAMETERS}"
     )
 
