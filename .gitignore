@@ -1,2 +1,15 @@
 *.egg-info
+*.pages
+*.dtmp
+*.bkp
+*.log
+
+.DS_Store
+.env
+.vscode
 __pycache__
+
+templates
+
+*.pdf
+*.pages
