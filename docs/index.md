@@ -5,8 +5,8 @@
 The term __Inkosi__ could sounds a little bit _weird_, indeed, it is actually coming from the _Zulu_ vocabulary, and it means __King__ or __Chief__ in _English_.
 
 ### _Inspiration_
-The choice was inspiered by [Kubernetes](https://kubernetes.io/), a _container orchestration system_ (It does completely different things).
-<br> 
+The choice was inspired by [Kubernetes](https://kubernetes.io/), a _container orchestration system_ (It does completely different things).
+<br>
 I just wanted to create a platform based on __multiservices__ in order to _simplify_, _accelerate_ and _streamline_ the Financial Institution __daily activies__.
 
 ### _Definition_
@@ -33,7 +33,7 @@ As shown below, the __platform__ has been _structured_ to serve __financial inst
 
 ### _Definition_
 
-It is a __OMS__ (Order Management System) written in _Python_ which interacts, through the __MetaTrader 5__ library, with the MetaTrader 5 Client. 
+It is a __OMS__ (Order Management System) written in _Python_ which interacts, through the __MetaTrader 5__ library, with the MetaTrader 5 Client.
 <br>
 The project aims to offers a __solid__ and __reliable__ _infrastructure_ able to quickly __open__ and __close__ trading positions.
 
@@ -42,7 +42,7 @@ The project aims to offers a __solid__ and __reliable__ _infrastructure_ able to
 Here you will find the list with all the libraries implemented on the platform with its explanation:
 
 - [SQLAlchemy](https://docs.sqlalchemy.org/en/20/) - Version (2.0.21)
-    - It has been used for __interactions__ with the _PostgreSQL database_ (going forward with the documentation, it is possible to analyze these aspects more thoroughly) 
+    - It has been used for __interactions__ with the _PostgreSQL database_ (going forward with the documentation, it is possible to analyze these aspects more thoroughly)
 - [Beartype](https://beartype.readthedocs.io/en/latest/) - Version 0.16.2
     - Beartype is an open-source pure-Python runtime type checker emphasizing efficiency, portability, and thrilling puns.
     - Used to __check if__ some methods parameters have been correctly typed

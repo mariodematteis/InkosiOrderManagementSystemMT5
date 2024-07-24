@@ -39,9 +39,9 @@ In particular, 3 particular __types of security__ _layers_ have been developed:
 - Backtest
 - Database
 - Log
-- Mailing _(Under development)_
-- Portfolio _(Under development)_
-- Scheduler _(Under development)_
+- Mailing _(Under Development)_
+- Portfolio _(Under Development)_
+- Scheduler _(Under Development)_
 - Utils
 - Web
 
