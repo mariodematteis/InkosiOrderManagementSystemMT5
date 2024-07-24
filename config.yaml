@@ -1,8 +1,8 @@
 PostgreSQL:
   PROTOCOL: postgresql
-  USERNAME: fabrizio_iozzi
-  PASSWORD: "p8AHf,5K{b1'}OlV"
-  HOSTNAME: 34.28.220.35
+  USERNAME: -
+  PASSWORD: -
+  HOSTNAME: -
   PORT: 5432
   DATABASE: Inkosi
   SCHEMA: development
@@ -10,9 +10,9 @@ PostgreSQL:
 
 MongoDB:
   PROTOCOL: mongodb+srv
-  USERNAME: mongodb
-  PASSWORD: 4SfgTMaSen4i81vI
-  HOSTNAME: exam.9yilgpl.mongodb.net
+  USERNAME: -
+  PASSWORD: -
+  HOSTNAME: -
   PORT: 27017
   DATABASE: production
   PARAMETERS: ""
@@ -62,9 +62,9 @@ DefaultAdministrators:
       - ADMINISTRATOR_IFM_FULL_ACCESS
     active: True
   5678:
-    first_name: Fabrizio
-    second_name: Iozzi
-    email_address: fabrizioiozzi@admin.it
+    first_name: Sample
+    second_name: Test
+    email_address: sampletest@admin.it
     birthday: 1900-01-01
     fiscal_code: test
     password: test
@@ -84,9 +84,9 @@ DefaultInvestors:
       - INVESTOR_SAMPLING_SCENARIOS
       - INVESTOR_BACKTEST_ALL
     active: True
-  - first_name: Fabrizio
-    second_name: Iozzi
-    email_address: fabrizioiozzi@investor.it
+  - first_name: Sample
+    second_name: Test
+    email_address: sampletest@investor.it
     birthday: 1900-01-01
     fiscal_code: test
     password: test

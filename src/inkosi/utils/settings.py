@@ -182,7 +182,8 @@ class Policies:
 
     Attributes:
         Administrator (list[str]): List of policies for users with the Administrator
-        role. Investor (list[str]): List of policies for users with the Investor role.
+        role.
+        Investor (list[str]): List of policies for users with the Investor role.
 
     Note:
         This class is designed to hold access policies for different user roles.
@@ -309,7 +310,7 @@ class Settings:
 @lru_cache
 def get_environmental_settings() -> EnvSettings:
     """
-    Function to retrieve environmental settings using caching.
+    Function to retrieve environmental settings.
 
     Returns:
         EnvSettings: An instance of the EnvSettings class representing
@@ -326,7 +327,7 @@ def get_environmental_settings() -> EnvSettings:
 @lru_cache
 def get_settings() -> Settings:
     """
-    Function to fetch application settings using caching.
+    Function to fetch application settings.
 
     Returns:
         Settings: An instance of the Settings class representing the overall
@@ -349,7 +350,7 @@ def get_settings() -> Settings:
 @lru_cache
 def get_postgresql_settings() -> PostgreSQL:
     """
-    Function to fetch PostgreSQL settings using caching.
+    Function to fetch PostgreSQL settings.
 
     Returns:
         PostgreSQL: An instance of the PostgreSQL class representing the overall

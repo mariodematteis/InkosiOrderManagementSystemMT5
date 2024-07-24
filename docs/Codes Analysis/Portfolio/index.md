@@ -4,7 +4,7 @@
 
 ### _Risk Management_
 
-At the __state of art__, it is possible to load a __pre-trained risk management model__, its __3-dimensional__ _vectorial output_ should only be composed by:
+Currently, it is possible to load a __pre-trained risk management model__, its __3-dimensional__ _vectorial output_ should only be composed by:
 
 - __Volume__
 - __Take Profit__

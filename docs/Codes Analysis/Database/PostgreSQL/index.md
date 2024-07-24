@@ -2,7 +2,7 @@
 
 ### _Introduction_
 
-To the __state of art__, the __PostgreSQL__ _instance_ is necessary to save all the information relatively to the _organisation chart_, as could be seen from <span style="background-color:rgba(0, 0, 0, 0.0470588); text-align:center; vertical-align: middle; padding:3px;">models.py</span> in the <span style="background-color:rgba(0, 0, 0, 0.0470588); text-align:center; vertical-align: middle; padding:3px;">inkosi.database.postgresql</span> _package_.
+Currently, the __PostgreSQL__ _instance_ is necessary to save all the information relatively to the _organisation chart_, as could be seen from <span style="background-color:rgba(0, 0, 0, 0.0470588); text-align:center; vertical-align: middle; padding:3px;">models.py</span> in the <span style="background-color:rgba(0, 0, 0, 0.0470588); text-align:center; vertical-align: middle; padding:3px;">inkosi.database.postgresql</span> _package_.
 
 The __organisation chart__ essentially represents all the different figures composing a __Financial Institution__, those already mentioned at the [Dashboard](../../../index.md)
 
