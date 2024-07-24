@@ -8,6 +8,7 @@
 ## Table of Contents
 
 - [Introduction](#introduction)
+- [Features](#features)
 - [Installation](#installation)
     - [On Windows](#installation-on-windows)
     - [On Windows-based Docker Container](#installation-as-a-windows-based-docker-container)
@@ -33,6 +34,8 @@ MetaTrader5 is the most used trading platform on CFDs Broker.
 
 > [!NOTE]
 > __*CFD*__, *Credit For Difference*, is a contract between a buyer and a seller that stipulates that the buyer must pay the seller the difference between the current value of an asset and its value at contract time.
+
+## Features
 
 ### Installation on Windows
 

@@ -1,7 +1,3 @@
-README (for the Exam).pdf
-
-templates
-
 *.egg-info
 *.pages
 *.dtmp
@@ -12,3 +8,8 @@ templates
 .env
 .vscode
 __pycache__
+
+templates
+
+*.pdf
+*.pages
